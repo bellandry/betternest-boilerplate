@@ -1,5 +1,9 @@
 export type ProviderKind = 'credential' | 'oauth';
 
+// Availability of a template in the catalog. `coming-soon` entries are shown
+// (disabled) in the CLI as a roadmap preview but can never be selected.
+export type TemplateStatus = 'available' | 'coming-soon';
+
 // A single auth method (email/password, Google, GitHub, ...).
 // Adding a new provider = adding a folder under templates/auth-providers/ that
 // exports a manifest shaped like this. The generator never hardcodes provider
@@ -8,6 +12,8 @@ export interface ProviderManifest {
   id: string;
   label: string;
   kind: ProviderKind;
+  // Defaults to 'available' when omitted.
+  status?: TemplateStatus;
   // Env vars this provider needs (for future CLI validation / docs).
   requiredEnvVars: string[];
 
@@ -36,6 +42,8 @@ export interface ProviderManifest {
 export interface DbManifest {
   id: string;
   label: string;
+  // Defaults to 'available' when omitted.
+  status?: TemplateStatus;
   // Directory whose contents are copied verbatim into the project root
   // (e.g. packages/db/**). .hbs files are token-substituted + de-suffixed.
   filesDir: string;

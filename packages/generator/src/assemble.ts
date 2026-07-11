@@ -1,17 +1,12 @@
 import fs from 'node:fs';
 import path from 'node:path';
-import { pathToFileURL } from 'node:url';
 import type { DbManifest, ProviderManifest, Selection } from './types';
 import { buildTokens, replaceTokens } from './tokens';
 import { copyBaseFiles } from './copy-base-files';
 import { injectMarkers } from './inject-markers';
 import { mergePackageJson } from './merge-package-json';
 import { mergeEnvFile } from './merge-env-files';
-
-// Repo layout (relative to this file: packages/generator/src/assemble.ts).
-const REPO_ROOT = path.resolve(__dirname, '..', '..', '..');
-const TEMPLATES = path.join(REPO_ROOT, 'templates');
-const BASE_DIR = path.join(TEMPLATES, 'base');
+import { DEFAULT_TEMPLATES_DIR, loadManifest } from './manifests';
 
 // Base files the assembler composes from fragments (POSIX, project-relative,
 // .hbs stripped). copyBaseFiles skips these; we write them explicitly.
@@ -34,18 +29,13 @@ const DIVIDER_JSX =
 type LoadedProvider = { manifest: ProviderManifest; dir: string };
 type LoadedDb = { manifest: DbManifest; dir: string };
 
-async function loadDefault<T>(file: string): Promise<T> {
-  const mod = (await import(pathToFileURL(file).href)) as { default: T };
-  return mod.default;
-}
-
 function readFrag(dir: string, rel: string, tokens: Record<string, string>): string {
   const abs = path.resolve(dir, rel);
   return replaceTokens(fs.readFileSync(abs, 'utf8'), tokens);
 }
 
-function readBase(rel: string, tokens: Record<string, string>): string {
-  const abs = path.join(BASE_DIR, rel);
+function readBase(baseDir: string, rel: string, tokens: Record<string, string>): string {
+  const abs = path.join(baseDir, rel);
   return replaceTokens(fs.readFileSync(abs, 'utf8'), tokens);
 }
 
@@ -55,7 +45,19 @@ function write(outDir: string, rel: string, content: string): void {
   fs.writeFileSync(abs, content);
 }
 
-export async function generateProject(selection: Selection, outputDir: string): Promise<void> {
+export interface GenerateOptions {
+  // Root of the templates/ tree. Defaults to the repo-root layout so the
+  // Phase-1 scripts work unchanged; the CLI passes its bundled templates dir.
+  templatesDir?: string;
+}
+
+export async function generateProject(
+  selection: Selection,
+  outputDir: string,
+  options: GenerateOptions = {},
+): Promise<void> {
+  const templatesDir = options.templatesDir ?? DEFAULT_TEMPLATES_DIR;
+  const baseDir = path.join(templatesDir, 'base');
   const tokens = buildTokens(selection.projectName);
   const outDir = path.resolve(outputDir);
 
@@ -64,22 +66,25 @@ export async function generateProject(selection: Selection, outputDir: string): 
   fs.mkdirSync(outDir, { recursive: true });
 
   // ── Load manifests ──
-  const dbDir = path.join(TEMPLATES, 'db', selection.db);
+  const dbDir = path.join(templatesDir, 'db', selection.db);
   const db: LoadedDb = {
-    manifest: await loadDefault<DbManifest>(path.join(dbDir, 'manifest.ts')),
+    manifest: await loadManifest<DbManifest>(path.join(dbDir, 'manifest.ts')),
     dir: dbDir,
   };
 
   const providers: LoadedProvider[] = [];
   for (const id of selection.authProviders) {
-    const dir = path.join(TEMPLATES, 'auth-providers', id);
-    providers.push({ manifest: await loadDefault<ProviderManifest>(path.join(dir, 'manifest.ts')), dir });
+    const dir = path.join(templatesDir, 'auth-providers', id);
+    providers.push({
+      manifest: await loadManifest<ProviderManifest>(path.join(dir, 'manifest.ts')),
+      dir,
+    });
   }
   const credentials = providers.filter((p) => p.manifest.kind === 'credential');
   const oauth = providers.filter((p) => p.manifest.kind === 'oauth');
 
   // ── 1. Base tree (skips composed files) ──
-  copyBaseFiles(BASE_DIR, outDir, tokens, COMPOSED);
+  copyBaseFiles(baseDir, outDir, tokens, COMPOSED);
 
   // ── 2. DB files (packages/db/**) ──
   copyBaseFiles(path.resolve(db.dir, db.manifest.filesDir), outDir, tokens, new Set());
@@ -88,7 +93,7 @@ export async function generateProject(selection: Selection, outputDir: string): 
   const socialInner = oauth
     .map((p) => readFrag(p.dir, p.manifest.serverConfigFragmentPath, tokens).trim())
     .join('\n');
-  const authIndex = injectMarkers(readBase('packages/auth/src/index.ts.hbs', tokens), {
+  const authIndex = injectMarkers(readBase(baseDir, 'packages/auth/src/index.ts.hbs', tokens), {
     DB_ADAPTER_IMPORT: readFrag(db.dir, db.manifest.adapterImportFragmentPath, tokens).trim(),
     DB_ADAPTER_CONFIG: readFrag(db.dir, db.manifest.adapterConfigFragmentPath, tokens).trim(),
     CREDENTIAL_PROVIDERS_CONFIG: credentials
@@ -121,7 +126,7 @@ export async function generateProject(selection: Selection, outputDir: string): 
   write(
     outDir,
     'apps/web/app/(auth)/sign-in/page.tsx',
-    injectMarkers(readBase('apps/web/app/(auth)/sign-in/page.tsx.hbs', tokens), {
+    injectMarkers(readBase(baseDir, 'apps/web/app/(auth)/sign-in/page.tsx.hbs', tokens), {
       AUTH_UI_IMPORTS: uiImports,
       SIGN_IN_FORM: signInForm,
       AUTH_DIVIDER: dividerFor(signInForm),
@@ -131,7 +136,7 @@ export async function generateProject(selection: Selection, outputDir: string): 
   write(
     outDir,
     'apps/web/app/(auth)/sign-up/page.tsx',
-    injectMarkers(readBase('apps/web/app/(auth)/sign-up/page.tsx.hbs', tokens), {
+    injectMarkers(readBase(baseDir, 'apps/web/app/(auth)/sign-up/page.tsx.hbs', tokens), {
       AUTH_UI_IMPORTS: uiImports,
       SIGN_UP_FORM: signUpForm,
       AUTH_DIVIDER: dividerFor(signUpForm),
@@ -147,11 +152,11 @@ export async function generateProject(selection: Selection, outputDir: string): 
   write(
     outDir,
     'apps/api/.env.example',
-    mergeEnvFile(readBase('apps/api/.env.example.hbs', tokens), dbEnv, providerEnvs),
+    mergeEnvFile(readBase(baseDir, 'apps/api/.env.example.hbs', tokens), dbEnv, providerEnvs),
   );
 
   // ── 7. root package.json (base + db scripts fragment) ──
-  let rootPkg = readBase('package.json.hbs', tokens);
+  let rootPkg = readBase(baseDir, 'package.json.hbs', tokens);
   if (db.manifest.packageJsonFragmentPath) {
     rootPkg = mergePackageJson(rootPkg, readFrag(db.dir, db.manifest.packageJsonFragmentPath, tokens));
   }
@@ -166,6 +171,6 @@ export async function generateProject(selection: Selection, outputDir: string): 
   write(
     outDir,
     'README.md',
-    injectMarkers(readBase('README.md.hbs', tokens), { AUTH_SETUP_STEPS: setupSteps }),
+    injectMarkers(readBase(baseDir, 'README.md.hbs', tokens), { AUTH_SETUP_STEPS: setupSteps }),
   );
 }

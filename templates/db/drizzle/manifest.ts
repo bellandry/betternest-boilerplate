@@ -6,7 +6,8 @@ import type { DbManifest } from '../../../packages/generator/src/types';
 // a real Selection yet: the fragments are placeholders.
 const manifest: DbManifest = {
   id: 'drizzle',
-  label: 'Drizzle + PostgreSQL (coming soon)',
+  label: 'Drizzle + PostgreSQL',
+  status: 'coming-soon',
   filesDir: 'files',
   adapterImportFragmentPath: 'adapter-import.fragment.ts',
   adapterConfigFragmentPath: 'adapter-config.fragment.ts',

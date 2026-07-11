@@ -6,6 +6,11 @@
   "types": "./src/assemble.ts",
   "exports": {
     ".": "./src/assemble.ts",
-    "./types": "./src/types.ts"
+    "./types": "./src/types.ts",
+    "./catalog": "./src/catalog.ts",
+    "./default-selection": "./DEFAULT_SELECTION.ts"
+  },
+  "dependencies": {
+    "jiti": "^2.4.2"
   }
 }

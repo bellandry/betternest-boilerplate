@@ -6,8 +6,9 @@ import type { ProviderManifest } from '../../../packages/generator/src/types';
 // the folder to `discord` and add 'discord' to a Selection.
 const manifest: ProviderManifest = {
   id: '_placeholder-discord',
-  label: 'Discord (coming soon)',
+  label: 'Discord',
   kind: 'oauth',
+  status: 'coming-soon',
   requiredEnvVars: ['DISCORD_CLIENT_ID', 'DISCORD_CLIENT_SECRET'],
   serverConfigFragmentPath: 'server-config.fragment.ts',
   clientUiFragmentPath: 'client-ui.fragment.tsx',
