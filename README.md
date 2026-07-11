@@ -1,14 +1,20 @@
 # BetterNest Boilerplate — template system
 
-Phase 1 of the BetterNest Boilerplate: the Phase-0 golden-path monorepo
-(Next.js 16 + NestJS + Better Auth + Prisma) extracted into **composable
-templates** plus a small **generator** that assembles a project from a
-selection of auth providers and a database.
-
-This is **not** the interactive CLI (Phase 2). The selection is a hardcoded stub
-(`packages/generator/DEFAULT_SELECTION.ts`).
+The Phase-0 golden-path monorepo (Next.js 16 + NestJS + Better Auth + Prisma)
+extracted into **composable templates** plus a **generator** that assembles a
+project from a selection of auth providers and a database, and an interactive
+**CLI** that drives it.
 
 ## Quick start
+
+Scaffold a new project with the CLI:
+
+```bash
+pnpm cli:dev my-app        # build + run the CLI locally
+# published equivalent: npx create-betternest-app my-app
+```
+
+Or drive the generator directly with the hardcoded default selection:
 
 ```bash
 pnpm install
@@ -35,6 +41,7 @@ pnpm dev                  # web :3000, api :4000
 | `templates/db/`          | database choices (Prisma; Drizzle skeleton)          |
 | `templates/auth-providers/` | auth methods (email-password, Google, GitHub)     |
 | `packages/generator/`    | the assembly engine (pure logic, no CLI)             |
+| `packages/cli/`          | interactive CLI (`create-betternest-app`) — prompts + flags |
 | `scripts/`               | `generate-default`, `smoke-test`                     |
 | `examples/mvp/`          | committed generated reference — do not edit by hand  |
 

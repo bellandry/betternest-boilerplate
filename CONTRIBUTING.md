@@ -59,6 +59,10 @@ Then add the provider `id` to a `Selection` (e.g. `DEFAULT_SELECTION.ts`).
 > See `templates/auth-providers/_placeholder-discord/` for a complete disabled
 > example. Folders prefixed with `_` are never auto-included.
 
+To surface a template as a disabled roadmap preview instead of hiding it, set
+`status: 'coming-soon'` in its manifest (see `templates/db/drizzle/`). The CLI
+shows it disabled and rejects it if passed via a flag.
+
 ## Add a new database choice
 
 Create `templates/db/<id>/` with a `manifest.ts` (`DbManifest`),
@@ -83,3 +87,33 @@ pnpm smoke-test
 
 Commit the regenerated `examples/mvp/` alongside your template change so the
 committed reference never drifts from the templates.
+
+## Test the CLI locally (before publishing)
+
+The CLI (`packages/cli`) wraps the generator behind prompts/flags. It ships as a
+`tsup` bundle with `templates/` copied into `dist/templates`, so it must be
+built before running.
+
+```bash
+# Build + run in one step (fastest iteration):
+pnpm cli:dev my-test-app
+
+# Non-interactive (matches CI usage):
+pnpm cli:build
+node packages/cli/dist/index.js my-test-app --yes --db=prisma --auth=email-password,google,github --no-install --no-git
+```
+
+To exercise the exact `npx` experience of a published package:
+
+```bash
+cd packages/cli
+pnpm build
+pnpm link --global
+create-betternest-app my-test-app
+pnpm unlink --global
+```
+
+Rebuild (`pnpm cli:build`) after changing templates — the bundle reads its own
+copied `dist/templates`, not the repo `templates/`. See `packages/cli/README.md`
+for the full flag reference.
+
