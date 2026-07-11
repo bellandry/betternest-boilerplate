@@ -1,4 +1,4 @@
-# Golden Path — Next.js 16 + NestJS + Better Auth Monorepo
+# BetterNest Boilerplate — Next.js 16 + NestJS + Better Auth Monorepo
 
 A reference monorepo for **cross-app authentication done right**. It pairs a
 Next.js 16 frontend with a separate NestJS backend and wires Better Auth so

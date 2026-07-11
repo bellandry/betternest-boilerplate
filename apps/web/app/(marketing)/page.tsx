@@ -8,7 +8,7 @@ export default function LandingPage() {
         Next.js 16 · NestJS · Better Auth
       </span>
       <h1 className="text-balance text-5xl font-bold tracking-tight sm:text-6xl">
-        The Golden Path starter
+        The BetterNest Boilerplate starter
       </h1>
       <p className="max-w-xl text-balance text-lg text-muted-foreground">
         Cross-app authentication that just works. Same-origin proxy, session cookies that survive

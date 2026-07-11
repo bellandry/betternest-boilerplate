@@ -17,7 +17,7 @@ export default async function AppLayout({ children }: { children: React.ReactNod
       <header className="border-b">
         <nav className="mx-auto flex max-w-5xl items-center justify-between px-6 py-4">
           <Link href="/dashboard" className="font-semibold tracking-tight">
-            Golden Path
+            BetterNest Boilerplate
           </Link>
           <div className="flex items-center gap-4 text-sm">
             <Link href="/dashboard" className="text-muted-foreground hover:text-foreground">

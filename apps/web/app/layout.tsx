@@ -2,7 +2,7 @@ import type { Metadata } from 'next';
 import '@repo/ui/globals.css';
 
 export const metadata: Metadata = {
-  title: 'Golden Path — Next.js + NestJS + Better Auth',
+  title: 'BetterNest Boilerplate — Next.js + NestJS + Better Auth',
   description: 'Cross-app authentication starter with a same-origin auth proxy.',
 };
 

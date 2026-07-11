@@ -1,4 +1,4 @@
-// Prisma schema for the Golden Path starter.
+// Prisma schema for the BetterNest Boilerplate starter.
 // Models User / Session / Account / Verification match EXACTLY what the
 // Better Auth Prisma adapter expects. `role` is an extra field wired via
 // Better Auth `user.additionalFields` in packages/auth.

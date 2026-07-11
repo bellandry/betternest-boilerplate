@@ -13,7 +13,7 @@ export default async function AuthLayout({ children }: { children: React.ReactNo
   return (
     <div className="flex min-h-screen flex-col items-center justify-center px-6 py-12">
       <Link href="/" className="mb-8 text-lg font-semibold tracking-tight">
-        Golden Path
+        BetterNest Boilerplate
       </Link>
       {children}
     </div>
