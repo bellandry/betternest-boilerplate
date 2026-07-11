@@ -1,0 +1,37 @@
+'use client';
+
+import Link from 'next/link';
+// AUTH_UI_IMPORTS
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardFooter,
+  CardHeader,
+  CardTitle,
+} from '@repo/ui/card';
+
+export default function SignInPage() {
+  return (
+    <Card className="w-full max-w-sm">
+      <CardHeader>
+        <CardTitle className="text-2xl">Welcome back</CardTitle>
+        <CardDescription>Sign in to your account to continue.</CardDescription>
+      </CardHeader>
+      <CardContent className="flex flex-col gap-4">
+        {/* SIGN_IN_FORM */}
+        {/* AUTH_DIVIDER */}
+        {/* OAUTH_BUTTONS */}
+      </CardContent>
+      <CardFooter className="justify-center text-sm text-muted-foreground">
+        No account?&nbsp;
+        <Link
+          href="/sign-up"
+          className="font-medium text-foreground underline-offset-4 hover:underline"
+        >
+          Sign up
+        </Link>
+      </CardFooter>
+    </Card>
+  );
+}

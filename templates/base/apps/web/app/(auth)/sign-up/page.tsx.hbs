@@ -1,0 +1,37 @@
+'use client';
+
+import Link from 'next/link';
+// AUTH_UI_IMPORTS
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardFooter,
+  CardHeader,
+  CardTitle,
+} from '@repo/ui/card';
+
+export default function SignUpPage() {
+  return (
+    <Card className="w-full max-w-sm">
+      <CardHeader>
+        <CardTitle className="text-2xl">Create account</CardTitle>
+        <CardDescription>Start with email, or use a social provider.</CardDescription>
+      </CardHeader>
+      <CardContent className="flex flex-col gap-4">
+        {/* SIGN_UP_FORM */}
+        {/* AUTH_DIVIDER */}
+        {/* OAUTH_BUTTONS */}
+      </CardContent>
+      <CardFooter className="justify-center text-sm text-muted-foreground">
+        Already have an account?&nbsp;
+        <Link
+          href="/sign-in"
+          className="font-medium text-foreground underline-offset-4 hover:underline"
+        >
+          Sign in
+        </Link>
+      </CardFooter>
+    </Card>
+  );
+}
