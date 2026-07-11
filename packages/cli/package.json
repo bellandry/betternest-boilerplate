@@ -1,0 +1,28 @@
+{
+  "name": "create-betternest-app",
+  "version": "0.1.0",
+  "description": "Scaffold a BetterNest Boilerplate monorepo (Next.js + NestJS + Better Auth) with zero CORS/cookie/trustedOrigins pain.",
+  "bin": {
+    "create-betternest-app": "./dist/index.js"
+  },
+  "files": [
+    "dist"
+  ],
+  "scripts": {
+    "build": "tsup",
+    "start": "node dist/index.js"
+  },
+  "dependencies": {
+    "@clack/prompts": "^0.11.0",
+    "jiti": "^2.4.2"
+  },
+  "devDependencies": {
+    "@repo/generator": "workspace:*",
+    "@types/node": "^22.10.1",
+    "tsup": "^8.3.5",
+    "typescript": "^5.6.3"
+  },
+  "engines": {
+    "node": ">=18"
+  }
+}

@@ -10,11 +10,5 @@
     "noEmit": true,
     "types": ["node"]
   },
-  "include": [
-    "packages/generator/**/*.ts",
-    "packages/cli/**/*.ts",
-    "scripts/**/*.ts",
-    "templates/**/manifest.ts"
-  ],
-  "exclude": ["**/dist/**", "**/node_modules/**"]
+  "include": ["src/**/*.ts", "tsup.config.ts"]
 }
