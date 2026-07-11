@@ -1,0 +1,11 @@
+{
+  "name": "@repo/generator",
+  "version": "0.1.0",
+  "private": true,
+  "main": "./src/assemble.ts",
+  "types": "./src/assemble.ts",
+  "exports": {
+    ".": "./src/assemble.ts",
+    "./types": "./src/types.ts"
+  }
+}
