@@ -1,0 +1,29 @@
+node_modules
+.turbo
+dist
+.next
+out
+build
+
+# env
+.env
+.env.local
+.env.*.local
+
+# prisma
+packages/db/prisma/generated
+
+# test / tooling artifacts
+.playwright-mcp
+
+# logs
+*.log
+npm-debug.log*
+pnpm-debug.log*
+
+# os / editor
+.DS_Store
+Thumbs.db
+.idea
+.vscode/*
+!.vscode/extensions.json
