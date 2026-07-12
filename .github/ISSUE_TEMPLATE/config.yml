@@ -1,0 +1,8 @@
+blank_issues_enabled: false
+contact_links:
+  - name: Questions & general help
+    url: https://github.com/bellandry/betternest-boilerplate/discussions
+    about: Ask questions, share setups, and discuss ideas in GitHub Discussions.
+  - name: Report a security vulnerability
+    url: https://github.com/bellandry/betternest-boilerplate/security/advisories/new
+    about: Privately disclose a security issue — please do not open a public issue.
