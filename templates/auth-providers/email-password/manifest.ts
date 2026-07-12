@@ -4,7 +4,7 @@ const manifest: ProviderManifest = {
   id: 'email-password',
   label: 'Email & Password',
   kind: 'credential',
-  requiredEnvVars: ['RESEND_API_KEY', 'EMAIL_FROM'],
+  requiredEnvVars: ['EMAIL_PROVIDER', 'EMAIL_FROM'],
   serverConfigFragmentPath: 'server-config.fragment.ts',
   serverImportFragmentPath: 'server-import.fragment.ts',
   authPackageJsonFragmentPath: 'auth-package.json.fragment.json',

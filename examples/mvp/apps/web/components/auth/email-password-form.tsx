@@ -1,12 +1,18 @@
 'use client';
 
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { Button } from '@repo/ui/button';
 import { Input } from '@repo/ui/input';
 import { Label } from '@repo/ui/label';
 import { authClient } from '@/lib/auth-client';
+
+// A resend is only allowed once every RESEND_COOLDOWN_SECONDS, so a user can't
+// spam verification emails (each click would otherwise mint a fresh token and
+// send another mail). Keep this >= the previous token's lifetime if you want a
+// resend to only happen after the old link has expired.
+const RESEND_COOLDOWN_SECONDS = 60;
 
 export function EmailPasswordSignInForm() {
   const router = useRouter();
@@ -15,9 +21,16 @@ export function EmailPasswordSignInForm() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   // Set when sign-in is blocked because the email hasn't been verified yet, so
-  // we can offer a one-click "resend verification email" action.
+  // we can offer a (rate-limited) "resend verification email" action.
   const [unverified, setUnverified] = useState(false);
   const [resent, setResent] = useState(false);
+  const [cooldown, setCooldown] = useState(0);
+
+  useEffect(() => {
+    if (cooldown <= 0) return;
+    const id = setTimeout(() => setCooldown((s) => s - 1), 1000);
+    return () => clearTimeout(id);
+  }, [cooldown]);
 
   async function onSubmit(e: React.FormEvent) {
     e.preventDefault();
@@ -41,9 +54,10 @@ export function EmailPasswordSignInForm() {
   }
 
   async function resendVerification() {
-    setResent(false);
+    if (cooldown > 0) return;
     await authClient.sendVerificationEmail({ email, callbackURL: '/dashboard' });
     setResent(true);
+    setCooldown(RESEND_COOLDOWN_SECONDS);
   }
 
   return (
@@ -79,19 +93,23 @@ export function EmailPasswordSignInForm() {
       </div>
       {error ? <p className="text-sm text-destructive">{error}</p> : null}
       {unverified ? (
-        resent ? (
-          <p className="text-sm text-muted-foreground">
-            Verification email sent — check your inbox.
-          </p>
-        ) : (
+        <div className="flex flex-col gap-1">
           <button
             type="button"
             onClick={resendVerification}
-            className="text-left text-sm font-medium text-foreground underline-offset-4 hover:underline"
+            disabled={cooldown > 0}
+            className="text-left text-sm font-medium text-foreground underline-offset-4 hover:underline disabled:cursor-not-allowed disabled:no-underline disabled:opacity-60"
           >
-            Resend verification email
+            {cooldown > 0
+              ? `Resend verification email in ${cooldown}s`
+              : 'Resend verification email'}
           </button>
-        )
+          {resent ? (
+            <p className="text-xs text-muted-foreground">
+              Verification email sent — check your inbox (and spam).
+            </p>
+          ) : null}
+        </div>
       ) : null}
       <Button type="submit" disabled={loading}>
         {loading ? 'Signing in…' : 'Sign in'}
