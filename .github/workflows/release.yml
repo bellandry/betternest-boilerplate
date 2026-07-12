@@ -50,4 +50,9 @@ jobs:
           publish: pnpm release
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          # changesets/action keys npm auth off NPM_TOKEN; without it (and with
+          # id-token: write) it falls back to OIDC trusted publishing, which
+          # isn't configured for this package. NODE_AUTH_TOKEN wires the same
+          # secret into setup-node's .npmrc.
+          NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
