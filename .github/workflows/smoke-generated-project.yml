@@ -1,0 +1,94 @@
+name: Smoke (generated project)
+
+# Heavier end-to-end check: scaffold a project with the CLI, spin up Postgres,
+# push the schema, build it, and confirm the API boots and answers the Better
+# Auth session endpoint without a server error. Runs ONLY on push to main to
+# keep PR cost low. Does NOT test real OAuth (needs Google/GitHub secrets).
+on:
+  push:
+    branches: [main]
+
+jobs:
+  smoke:
+    name: scaffold · db push · build · boot
+    runs-on: ubuntu-latest
+    env:
+      DATABASE_URL: postgresql://postgres:postgres@localhost:5432/my_app?schema=public
+      BETTER_AUTH_SECRET: ci-smoke-not-a-real-secret-0123456789abcdef
+      WEB_URL: http://localhost:3000
+      PORT: "4000"
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v4
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: pnpm
+
+      - name: Install monorepo dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Build the CLI
+        run: pnpm cli:build
+
+      # Generate OUTSIDE the monorepo (runner.temp) so pnpm doesn't treat the
+      # new project as part of this repo's workspace.
+      - name: Scaffold a project (default selection)
+        working-directory: ${{ runner.temp }}
+        run: node "$GITHUB_WORKSPACE/packages/cli/dist/index.js" my-app --yes --no-install --no-git
+
+      - name: Install generated project dependencies
+        working-directory: ${{ runner.temp }}/my-app
+        run: pnpm install
+
+      - name: Start Postgres
+        working-directory: ${{ runner.temp }}/my-app
+        run: docker compose up -d postgres
+
+      - name: Wait for Postgres to be ready
+        run: |
+          for i in $(seq 1 30); do
+            if docker exec my-app-postgres pg_isready -U postgres >/dev/null 2>&1; then
+              echo "Postgres ready"; exit 0
+            fi
+            echo "waiting for postgres ($i)..."; sleep 2
+          done
+          echo "Postgres did not become ready"; exit 1
+
+      - name: Push database schema
+        working-directory: ${{ runner.temp }}/my-app
+        run: pnpm db:push
+
+      - name: Build the generated project
+        working-directory: ${{ runner.temp }}/my-app
+        run: pnpm build
+
+      - name: Boot the API and probe the session endpoint
+        working-directory: ${{ runner.temp }}/my-app
+        run: |
+          pnpm --filter=api start &
+          API_PID=$!
+          trap "kill $API_PID 2>/dev/null || true" EXIT
+
+          # Wait for the API to listen.
+          for i in $(seq 1 30); do
+            if curl -s -o /dev/null "http://localhost:${PORT}/api/auth/get-session"; then
+              break
+            fi
+            echo "waiting for api ($i)..."; sleep 2
+          done
+
+          # The endpoint must answer WITHOUT a 5xx. An unauthenticated response
+          # (200 with a null session) is the expected success here — we only
+          # assert the server did not crash.
+          CODE=$(curl -s -o /dev/null -w "%{http_code}" "http://localhost:${PORT}/api/auth/get-session")
+          echo "GET /api/auth/get-session -> HTTP $CODE"
+          if [ -z "$CODE" ] || [ "$CODE" -ge 500 ]; then
+            echo "API returned a server error (or no response)"; exit 1
+          fi
+          echo "API booted and answered without a server error."
