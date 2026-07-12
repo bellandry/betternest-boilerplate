@@ -1,5 +1,5 @@
 {
-  "name": "@repo/auth",
+  "name": "@repo/email",
   "version": "0.1.0",
   "private": true,
   "main": "./dist/index.js",
@@ -14,9 +14,7 @@
     "build": "tsc"
   },
   "dependencies": {
-    "@repo/db": "workspace:*",
-    "better-auth": "^1.6.23",
-    "@repo/email": "workspace:*"
+    "resend": "^6.17.2"
   },
   "devDependencies": {
     "@repo/typescript-config": "workspace:*",
