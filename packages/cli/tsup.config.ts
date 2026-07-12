@@ -14,7 +14,9 @@ export default defineConfig({
   minify: false,
   banner: { js: '#!/usr/bin/env node' },
   // Inline the workspace generator so the published package needs no monorepo.
-  noExternal: ['@repo/generator'],
+  // @clack/prompts is ESM-only from v1; bundle it so the CJS output never does a
+  // runtime require() of it (which throws ERR_REQUIRE_ESM on Node 18).
+  noExternal: ['@repo/generator', '@clack/prompts'],
   onSuccess: async () => {
     const src = path.resolve(__dirname, '..', '..', 'templates');
     const dest = path.resolve(__dirname, 'dist', 'templates');

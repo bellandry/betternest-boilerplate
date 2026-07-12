@@ -26,13 +26,13 @@ importers:
 
   packages/cli:
     dependencies:
-      '@clack/prompts':
-        specifier: ^1.7.0
-        version: 1.7.0
       jiti:
         specifier: ^2.4.2
         version: 2.7.0
     devDependencies:
+      '@clack/prompts':
+        specifier: ^1.7.0
+        version: 1.7.0
       '@repo/generator':
         specifier: workspace:*
         version: link:../generator
