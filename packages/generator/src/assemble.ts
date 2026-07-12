@@ -14,6 +14,7 @@ const COMPOSED = new Set<string>([
   'package.json',
   'README.md',
   'apps/api/.env.example',
+  'packages/auth/package.json',
   'packages/auth/src/index.ts',
   'apps/web/app/(auth)/sign-in/page.tsx',
   'apps/web/app/(auth)/sign-up/page.tsx',
@@ -89,6 +90,23 @@ export async function generateProject(
   // ── 2. DB files (packages/db/**) ──
   copyBaseFiles(path.resolve(db.dir, db.manifest.filesDir), outDir, tokens, new Set());
 
+  // ── 2b. Provider files (packages/email/**, extra (auth) pages, ...) ──
+  for (const p of providers) {
+    if (!p.manifest.filesDir) continue;
+    copyBaseFiles(path.resolve(p.dir, p.manifest.filesDir), outDir, tokens, new Set());
+  }
+
+  // ── 2c. packages/auth/package.json (base + provider dependency fragments) ──
+  let authPkg = readBase(baseDir, 'packages/auth/package.json', tokens);
+  for (const p of providers) {
+    if (!p.manifest.authPackageJsonFragmentPath) continue;
+    authPkg = mergePackageJson(
+      authPkg,
+      readFrag(p.dir, p.manifest.authPackageJsonFragmentPath, tokens),
+    );
+  }
+  write(outDir, 'packages/auth/package.json', authPkg);
+
   // ── 3. packages/auth/src/index.ts ──
   const socialInner = oauth
     .map((p) => readFrag(p.dir, p.manifest.serverConfigFragmentPath, tokens).trim())
@@ -96,6 +114,10 @@ export async function generateProject(
   const authIndex = injectMarkers(readBase(baseDir, 'packages/auth/src/index.ts.hbs', tokens), {
     DB_ADAPTER_IMPORT: readFrag(db.dir, db.manifest.adapterImportFragmentPath, tokens).trim(),
     DB_ADAPTER_CONFIG: readFrag(db.dir, db.manifest.adapterConfigFragmentPath, tokens).trim(),
+    AUTH_PROVIDER_IMPORT: providers
+      .filter((p) => p.manifest.serverImportFragmentPath)
+      .map((p) => readFrag(p.dir, p.manifest.serverImportFragmentPath as string, tokens).trim())
+      .join('\n'),
     CREDENTIAL_PROVIDERS_CONFIG: credentials
       .map((p) => readFrag(p.dir, p.manifest.serverConfigFragmentPath, tokens).trim())
       .join('\n'),

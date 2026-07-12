@@ -33,6 +33,23 @@ export interface ProviderManifest {
   signUpSlot?: string; // credential -> the sign-up form element
   oauthButtonSlot?: string; // oauth -> the button element
 
+  // Optional top-level import line(s) injected into packages/auth/src/index.ts
+  // at the AUTH_PROVIDER_IMPORT marker (e.g. `import { sendEmail } from
+  // '@repo/email';`). Kept separate from serverConfigFragment because that one
+  // is injected *inside* the betterAuth({ ... }) call, not at module scope.
+  serverImportFragmentPath?: string;
+
+  // Optional package.json fragment deep-merged into packages/auth/package.json
+  // (e.g. to add a `@repo/email` workspace dependency). Only applied when this
+  // provider is selected, so OAuth-only projects stay lean.
+  authPackageJsonFragmentPath?: string;
+
+  // Optional directory copied verbatim into the project root when this provider
+  // is selected (same semantics as DbManifest.filesDir): .hbs files are
+  // token-substituted + de-suffixed. Used to ship provider-only packages
+  // (packages/email) and pages (reset-password) without bloating other setups.
+  filesDir?: string;
+
   // Optional .env.example snippet + README setup instructions.
   envFragmentPath?: string;
   readmeSetupPath?: string;
