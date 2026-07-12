@@ -61,7 +61,7 @@ pnpm unlink --global                  # when done
 ## Packaging
 
 - `tsup` bundles `src/index.ts` (+ the inlined generator) into a single
-  `dist/index.js` (CJS, Node 18+) with a `#!/usr/bin/env node` shebang.
+  `dist/index.js` (CJS, Node 20+) with a `#!/usr/bin/env node` shebang.
 - `templates/` is copied to `dist/templates` at build time, so the published
   package is self-contained (the CLI reads templates from beside the bundle).
 - Only `dist/` is published (`files` field). Runtime deps: `@clack/prompts`,
