@@ -117,3 +117,38 @@ Rebuild (`pnpm cli:build`) after changing templates — the bundle reads its own
 copied `dist/templates`, not the repo `templates/`. See `packages/cli/README.md`
 for the full flag reference.
 
+## MANDATORY: verify the packaged CLI before publishing
+
+A local run (`pnpm cli:dev`) reads templates straight from the repo and **cannot**
+catch packaging bugs. Only a real tarball round-trip can, so this is a required
+gate before any `pnpm publish`:
+
+```bash
+pnpm test:pack
+```
+
+`scripts/test-packaged-cli.ts` does what a real `npx create-betternest-app` does:
+
+1. builds the CLI bundle,
+2. `pnpm pack` → a real `.tgz` (not `npm pack`: only pnpm rewrites the
+   `workspace:*` specifier into a concrete version; a raw `npm pack` ships a
+   tarball that fails `npm install` with `EUNSUPPORTEDPROTOCOL`),
+3. installs that tarball **as a dependency** in a throwaway project fully
+   isolated from the monorepo (so only the published `dependencies` are present,
+   exactly like npx),
+4. runs the installed binary with `--yes`,
+5. diffs the generated project against `examples/mvp` (Prettier-normalized).
+
+It exits non-zero on any missing, extra, or differing file.
+
+> ### Packaging gotcha: `.gitignore`
+>
+> npm **strips any file literally named `.gitignore`** from a published tarball.
+> Template dotfiles that must survive packing are therefore stored under a
+> pack-safe name and renamed on write by the generator
+> (`packages/generator/src/copy-base-files.ts`, `PACK_SAFE_RENAMES`). The base
+> ignore file lives at `templates/base/gitignore` (no dot) and is emitted as
+> `.gitignore`. If you add another npm-stripped dotfile to a template, add it to
+> that map — `pnpm test:pack` will fail loudly if you forget.
+
+
