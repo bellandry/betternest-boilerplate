@@ -16,7 +16,7 @@ export async function runGenerator(
     await generateProject(selection, targetDir, { templatesDir });
     s.stop('Project generated');
   } catch (err) {
-    s.stop('Generation failed', 1);
+    s.stop('Generation failed');
     throw new CliError(
       `Project generation failed: ${(err as Error).message}`,
       'Re-run with --verbose for the full stack trace.',

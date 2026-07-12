@@ -25,7 +25,7 @@ export function installDependencies(
     s.stop('Dependencies installed');
     return { installed: true };
   } catch {
-    s.stop('Dependency installation failed', 1);
+    s.stop('Dependency installation failed');
     log.error(
       `Could not install dependencies. Finish manually:\n  cd ${targetDir}\n  ${cmd}`,
     );
