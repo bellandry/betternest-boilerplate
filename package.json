@@ -9,6 +9,7 @@
   "scripts": {
     "generate:default": "tsx scripts/generate-default.ts",
     "smoke-test": "tsx scripts/smoke-test.ts",
+    "test:pack": "tsx scripts/test-packaged-cli.ts",
     "cli:build": "pnpm --filter create-betternest-app build",
     "cli:dev": "pnpm --filter create-betternest-app build && node packages/cli/dist/index.js"
   },
