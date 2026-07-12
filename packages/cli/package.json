@@ -1,7 +1,27 @@
 {
   "name": "create-betternest-app",
   "version": "0.1.0",
-  "description": "Scaffold a BetterNest Boilerplate monorepo (Next.js + NestJS + Better Auth) with zero CORS/cookie/trustedOrigins pain.",
+  "description": "Scaffold a production-ready Next.js + NestJS + Better Auth monorepo with zero CORS, cookie, and trustedOrigins pain.",
+  "keywords": [
+    "nextjs",
+    "nestjs",
+    "better-auth",
+    "monorepo",
+    "cli",
+    "starter",
+    "authentication",
+    "turborepo"
+  ],
+  "license": "MIT",
+  "author": "Landry BELLA",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/bellandry/betternest-boilerplate.git"
+  },
+  "homepage": "https://github.com/bellandry/betternest-boilerplate#readme",
+  "bugs": {
+    "url": "https://github.com/bellandry/betternest-boilerplate/issues"
+  },
   "bin": {
     "create-betternest-app": "./dist/index.js"
   },

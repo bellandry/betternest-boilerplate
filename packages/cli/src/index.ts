@@ -74,7 +74,7 @@ main()
     } else {
       log.error(`Unexpected error: ${(err as Error).message ?? String(err)}`);
       log.info(
-        'This looks like a bug. Please open an issue:\n  https://github.com/anomalyco/betternest/issues',
+        'This looks like a bug. Please open an issue:\n  https://github.com/bellandry/betternest-boilerplate/issues',
       );
       if (verbose) console.error(err);
     }
