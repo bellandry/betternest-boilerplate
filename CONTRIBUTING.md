@@ -151,4 +151,42 @@ It exits non-zero on any missing, extra, or differing file.
 > `.gitignore`. If you add another npm-stripped dotfile to a template, add it to
 > that map — `pnpm test:pack` will fail loudly if you forget.
 
+## Versioning & releases (changesets)
+
+Versioning is managed with [changesets](https://github.com/changesets/changesets).
+**After any change that affects `packages/cli` or `packages/generator`, add a
+changeset before opening your PR:**
+
+```bash
+pnpm changeset
+```
+
+- Pick the appropriate semver bump:
+  - **patch** — bug fix, no behavior change for the user (e.g. a template typo).
+  - **minor** — new capability (e.g. a new auth provider or database choice).
+  - **major** — a breaking change to generated projects or CLI flags.
+- Describe the change in **one user-facing sentence** — what the change does for
+  someone scaffolding a project, not how it's implemented internally.
+  - Good: "Add Discord as an auth provider choice."
+  - Avoid: "Refactor provider manifest loader to use jiti."
+
+> `packages/generator` is `private` and never published on its own. Because it is
+> inlined into the CLI bundle at build time, changes to it ship inside the CLI —
+> so a generator change still warrants a changeset on `create-betternest-app`.
+> Selecting the CLI in the `pnpm changeset` prompt is the right choice.
+
+Only `packages/cli` (`create-betternest-app`) is publishable; every `private`
+package is skipped automatically. Verify what a PR will release with:
+
+```bash
+pnpm changeset status
+```
+
+Maintainers cut a release by applying the accumulated changesets and publishing:
+
+```bash
+pnpm version-packages   # changeset version — bumps versions + writes CHANGELOG
+pnpm release            # builds the CLI, then changeset publish
+```
+
 
