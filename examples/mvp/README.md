@@ -73,7 +73,7 @@ solution. This starter bakes the solution into the architecture.
         │                                                 │
         │  AuthController @All('/api/auth/*path')         │
         │        └─► toNodeHandler(auth)  (packages/auth) │
-        │                    └─► Prisma ─► PostgreSQL      │
+        │                    └─► @repo/db ─► PostgreSQL    │
         └───────────────────────────────────────────────┘
 ```
 

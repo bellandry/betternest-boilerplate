@@ -21,7 +21,7 @@ auth traffic is proxied same-origin through Next.js rewrites.
 | Frontend      | Next.js 16 (App Router), TypeScript strict, Tailwind, shadcn/ui |
 | Backend       | NestJS 11 (Express 5), TypeScript strict                       |
 | Auth          | Better Auth                                                    |
-| Database      | Prisma + PostgreSQL                                            |
+| Database      | {{DB_LABEL}}                                                   |
 | Lint / format | ESLint + Prettier (shared config packages)                    |
 
 ---
@@ -35,7 +35,7 @@ auth traffic is proxied same-origin through Next.js rewrites.
 │   └── api/                # NestJS   (port 4000) — Better Auth handler
 ├── packages/
 │   ├── auth/               # THE single betterAuth() instance (server-only)
-│   ├── db/                 # Prisma schema + singleton client
+│   ├── db/                 # {{DB_ORM}} schema + singleton client
 │   ├── ui/                 # shadcn/ui primitives + Tailwind preset
 │   ├── eslint-config/      # shared ESLint flat config
 │   └── typescript-config/  # shared tsconfig bases
@@ -73,7 +73,7 @@ solution. This starter bakes the solution into the architecture.
         │                                                 │
         │  AuthController @All('/api/auth/*path')         │
         │        └─► toNodeHandler(auth)  (packages/auth) │
-        │                    └─► Prisma ─► PostgreSQL      │
+        │                    └─► @repo/db ─► PostgreSQL    │
         └───────────────────────────────────────────────┘
 ```
 
@@ -178,11 +178,7 @@ the same-origin proxy, OAuth callbacks always target the **frontend origin**
 
 ## Data model
 
-Prisma models `User`, `Session`, `Account`, `Verification` match the Better Auth
-adapter exactly. One addition: `User.role` (`enum Role { user, admin }`, default
-`user`), wired via Better Auth `user.additionalFields.role` with `input: false`
-so clients can't self-assign a role. **No UI reads `role` yet** — it is RBAC
-groundwork for later.
+<!-- DB_NOTES -->
 
 ---
 
@@ -192,8 +188,8 @@ groundwork for later.
 | ---------------- | ------------------------------------- |
 | `pnpm dev`       | Run web + api in parallel (Turborepo) |
 | `pnpm build`     | Build all apps and packages           |
-| `pnpm db:push`   | Push Prisma schema to the database    |
-| `pnpm db:studio` | Open Prisma Studio                    |
+| `pnpm db:push`   | Push {{DB_ORM}} schema to the database |
+| `pnpm db:studio` | Open {{DB_ORM}} Studio                |
 | `pnpm lint`      | Lint all packages                     |
 | `pnpm format`    | Prettier write                        |
 
