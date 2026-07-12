@@ -11,8 +11,12 @@ on:
 
 jobs:
   smoke:
-    name: scaffold · db push · build · boot
+    name: ${{ matrix.db }} · scaffold · db push · build · boot
     runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        db: [prisma, drizzle]
     env:
       DATABASE_URL: postgresql://postgres:postgres@localhost:5432/my_app?schema=public
       BETTER_AUTH_SECRET: ci-smoke-not-a-real-secret-0123456789abcdef
@@ -39,9 +43,9 @@ jobs:
 
       # Generate OUTSIDE the monorepo (runner.temp) so pnpm doesn't treat the
       # new project as part of this repo's workspace.
-      - name: Scaffold a project (default selection)
+      - name: Scaffold a project (db=${{ matrix.db }})
         working-directory: ${{ runner.temp }}
-        run: node "$GITHUB_WORKSPACE/packages/cli/dist/index.js" my-app --yes --no-install --no-git
+        run: node "$GITHUB_WORKSPACE/packages/cli/dist/index.js" my-app --yes --db=${{ matrix.db }} --no-install --no-git
 
       - name: Install generated project dependencies
         working-directory: ${{ runner.temp }}/my-app
