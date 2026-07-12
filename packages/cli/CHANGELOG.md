@@ -1,5 +1,14 @@
 # create-betternest-app
 
+## 0.2.1
+
+### Patch Changes
+
+- 5de9a11: Fix the generated NestJS API failing to boot in production (`node dist/main.js`):
+
+  - Declare `express` as a direct dependency of `apps/api` (it is imported at runtime in `main.ts`).
+  - Compile the internal `@repo/auth` and `@repo/db` packages to CommonJS and point their `exports`/`main`/`types` at `dist/`, so the built API loads compiled JavaScript instead of raw TypeScript source.
+
 ## 0.2.0
 
 ### Minor Changes
