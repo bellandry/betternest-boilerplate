@@ -23,6 +23,7 @@
   "devDependencies": {
     "prisma": "^6.1.0",
     "@repo/typescript-config": "workspace:*",
+    "@types/node": "^22.10.1",
     "typescript": "^5.6.3"
   }
 }
