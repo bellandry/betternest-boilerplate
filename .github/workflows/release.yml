@@ -1,0 +1,58 @@
+name: Release
+
+# Automated versioning & publishing via changesets. Runs only on main.
+#
+# Two-phase behaviour, both handled by changesets/action:
+#   1. When unconsumed changesets exist on main, it opens/updates a
+#      "Version Packages" PR that applies the bumps + writes changelogs.
+#   2. When that PR is merged (no changesets left, versions already bumped),
+#      it runs the root `release` script to build and publish to npm.
+on:
+  push:
+    branches: [main]
+
+# Avoid overlapping releases stepping on each other.
+concurrency: ${{ github.workflow }}-${{ github.ref }}
+
+permissions:
+  contents: write
+  pull-requests: write
+  id-token: write
+
+jobs:
+  release:
+    name: version or publish
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v4
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: pnpm
+          # Wires NODE_AUTH_TOKEN into ~/.npmrc so `changeset publish` can auth.
+          registry-url: "https://registry.npmjs.org"
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Create Release PR or publish
+        uses: changesets/action@v1
+        with:
+          # Applies changesets: bumps versions + updates changelogs.
+          version: pnpm version-packages
+          # Builds the CLI and runs `changeset publish` (root `release` script).
+          publish: pnpm release
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          # changesets/action keys npm auth off NPM_TOKEN; without it (and with
+          # id-token: write) it falls back to OIDC trusted publishing, which
+          # isn't configured for this package. NODE_AUTH_TOKEN wires the same
+          # secret into setup-node's .npmrc.
+          NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
