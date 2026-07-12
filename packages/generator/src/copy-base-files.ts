@@ -15,11 +15,20 @@ const TEXT_EXTENSIONS = new Set([
   '.prettierrc', '.env',
 ]);
 
+// npm strips any file literally named `.gitignore` from a published tarball, so
+// template authors store it under a pack-safe name (`gitignore`) and we rename
+// it back on write. Same trick create-next-app uses. Keyed by basename.
+const PACK_SAFE_RENAMES: Record<string, string> = {
+  gitignore: '.gitignore',
+};
+
 function isTextFile(file: string): boolean {
+  const base = path.basename(file);
+  if (base in PACK_SAFE_RENAMES) return true;
   const ext = path.extname(file);
   if (TEXT_EXTENSIONS.has(ext)) return true;
   // dotfiles without extension we treat as text (.gitignore, .prettierrc)
-  return ext === '' && path.basename(file).startsWith('.');
+  return ext === '' && base.startsWith('.');
 }
 
 function toPosix(p: string): string {
@@ -44,10 +53,15 @@ export function copyBaseFiles(
 ): void {
   for (const abs of walkFiles(baseDir)) {
     const relFromBase = toPosix(path.relative(baseDir, abs));
-    // Destination relative path: strip a trailing .hbs suffix.
-    const destRel = relFromBase.endsWith('.hbs')
+    // Destination relative path: strip a trailing .hbs suffix, then map any
+    // pack-safe filename back to its real (npm-stripped) name.
+    let destRel = relFromBase.endsWith('.hbs')
       ? relFromBase.slice(0, -'.hbs'.length)
       : relFromBase;
+    const destBase = destRel.slice(destRel.lastIndexOf('/') + 1);
+    if (destBase in PACK_SAFE_RENAMES) {
+      destRel = destRel.slice(0, destRel.length - destBase.length) + PACK_SAFE_RENAMES[destBase];
+    }
 
     if (skip.has(destRel)) continue;
 
