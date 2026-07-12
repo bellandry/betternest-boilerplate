@@ -7,6 +7,8 @@
     "node": ">=20.9.0"
   },
   "scripts": {
+    "lint": "tsc --noEmit",
+    "build": "pnpm --filter create-betternest-app build",
     "generate:default": "tsx scripts/generate-default.ts",
     "smoke-test": "tsx scripts/smoke-test.ts",
     "test:pack": "tsx scripts/test-packaged-cli.ts",
