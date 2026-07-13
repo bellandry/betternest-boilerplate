@@ -19,7 +19,7 @@ their status) is read from the generator's catalog.
 | Flag             | Values                                    | Default            | Description                                              |
 | ---------------- | ----------------------------------------- | ------------------ | -------------------------------------------------------- |
 | `[project-name]` | valid npm/folder name                     | prompted           | Positional. Pre-fills and skips the name prompt.         |
-| `--db`           | `prisma` (`drizzle` = coming soon)        | `prisma`           | Database template id.                                    |
+| `--db`           | `prisma`, `drizzle`                        | `prisma`           | Database template id.                                    |
 | `--auth`         | `email-password,google,github` (CSV)      | all three          | Auth provider ids. `email-password` is always included.  |
 | `--pm`           | `pnpm` \| `npm` \| `yarn` \| `bun`        | detected → `pnpm`  | Package manager for install + printed commands.          |
 | `--no-install`   | —                                         | install runs       | Skip dependency installation.                            |
@@ -30,33 +30,9 @@ their status) is read from the generator's catalog.
 
 Notes:
 
-- **Coming-soon** choices (e.g. `drizzle`) appear disabled in prompts as a
-  roadmap preview and are rejected if passed via a flag.
 - Invalid values fail fast with a non-zero exit and a list of valid values.
 - An existing non-empty target directory is never overwritten silently:
   interactively you confirm; with `--yes` it errors.
-
-## Local development / testing (before publishing)
-
-From the monorepo root:
-
-```bash
-# Build the bundle and run it in one step (iterate quickly):
-pnpm cli:dev my-test-app
-
-# Just build the bundle (dist/index.js + dist/templates):
-pnpm cli:build
-```
-
-To test the exact `npx` behavior, link it globally:
-
-```bash
-cd packages/cli
-pnpm build
-pnpm link --global
-create-betternest-app my-test-app     # runs the linked bin like a published package
-pnpm unlink --global                  # when done
-```
 
 ## Packaging
 
