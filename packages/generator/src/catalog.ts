@@ -13,22 +13,75 @@ export interface CatalogEntry {
   label: string;
   status: TemplateStatus;
   kind?: ProviderKind; // auth providers only
+  database?: string; // SQL-engine (PostgreSQL, MySQL, SQLite)
+  ormName?: string; // ORM name (Prisma, Drizzle)
 }
 
 export interface CatalogOptions {
   templatesDir?: string;
 }
 
-// All database choices, e.g. prisma (available), drizzle (coming-soon).
-export async function listDatabases(opts: CatalogOptions = {}): Promise<CatalogEntry[]> {
+// All database-engine choices (deduplicated across ORMs). The CLI's first-phase
+// prompt shows one entry per engine, e.g. SQLite / PostgreSQL / MySQL.
+export interface DbEngineEntry {
+  id: string;
+  label: string;
+  available: boolean; // at least one ORM combo is selectable
+}
+
+export async function listDbEngines(
+  opts: CatalogOptions = {},
+): Promise<DbEngineEntry[]> {
+  const dbCombos = await listDbCombos(opts);
+  const seen = new Map<string, DbEngineEntry>();
+  for (const combo of dbCombos) {
+    const key = combo.database ?? combo.id;
+    const hasAvailable = combo.status === 'available';
+    if (seen.has(key)) {
+      if (hasAvailable) seen.get(key)!.available = true;
+    } else {
+      seen.set(key, {
+        id: key.toLowerCase().replace(/\s+/g, '-'),
+        label: combo.database ?? combo.label,
+        available: hasAvailable,
+      });
+    }
+  }
+  return [...seen.values()].sort((a, b) => {
+    // SQLite first (the default), then alphabetical.
+    if (a.id === 'sqlite') return -1;
+    if (b.id === 'sqlite') return 1;
+    return a.label.localeCompare(b.label);
+  });
+}
+
+// All ORM+database combos. Used by the CLI's second-phase prompt (filtered by
+// the engine chosen in phase one) and by --db flag validation.
+export async function listDbCombos(
+  opts: CatalogOptions = {},
+): Promise<CatalogEntry[]> {
   const templatesDir = opts.templatesDir ?? DEFAULT_TEMPLATES_DIR;
   const ids = listTemplateIds(templatesDir, 'db');
   const entries: CatalogEntry[] = [];
   for (const id of ids) {
     const m = await loadDbManifest(templatesDir, id);
-    entries.push({ id: m.id, label: m.label, status: m.status ?? 'available' });
+    entries.push({
+      id: m.id,
+      label: m.label,
+      status: m.status ?? 'available',
+      database: m.database,
+      ormName: m.ormName,
+    });
   }
   return entries.sort(byAvailableThenLabel);
+}
+
+// Kept for backwards compat with existing callers that just want the flat list
+// (e.g. --db flag validation).
+export async function listDatabases(
+  opts: CatalogOptions = {},
+): Promise<CatalogEntry[]> {
+  return listDbCombos(opts);
 }
 
 // All auth providers. Folders prefixed with `_` are internal/disabled and are

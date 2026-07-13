@@ -121,7 +121,7 @@ never silently rejected.
 
 - Node.js ≥ 20.9
 - pnpm ≥ 9 (`npm i -g pnpm`)
-- Docker (for Postgres) — or your own Postgres instance
+- Docker (for PostgreSQL or MySQL — not needed for SQLite)
 
 ### 1. Install dependencies
 
@@ -129,11 +129,11 @@ never silently rejected.
 pnpm install
 ```
 
-### 2. Start PostgreSQL
+### 2. Start the database
 
 ```bash
 cp .env.example .env        # root env feeds docker-compose
-docker compose up -d
+docker compose up -d        # skip this step for SQLite
 ```
 
 ### 3. Configure environment files
@@ -228,10 +228,11 @@ origin** (`WEB_URL`), not the API port.
 
 ## Data model
 
-Prisma models `User`, `Session`, `Account`, `Verification` match the Better Auth
-adapter exactly. One addition: `User.role` (`enum Role { user, admin }`, default
-`user`), wired via Better Auth `user.additionalFields.role` with `input: false`
-so clients can't self-assign a role. **No UI reads `role` yet** — it is RBAC
+Prisma models User, Session, Account, Verification match the Better Auth
+adapter exactly. One addition: User.role (enum Role { user, admin }, default
+user), wired via Better Auth user.additionalFields.role with input: false
+so clients can't self-assign a role. **No UI reads
+ole yet** � it is RBAC
 groundwork for later.
 
 ---

@@ -114,7 +114,7 @@ Usage:
   create-betternest-app [project-name] [options]
 
 Options:
-  --db=<id>            Database template id (e.g. prisma)
+  --db=<id>            Database template id (e.g. prisma-postgresql)
   --auth=<a,b,c>       Comma-separated auth provider ids (e.g. email-password,google,github)
   --pm=<manager>       Package manager: pnpm | npm | yarn | bun
   --no-install         Skip installing dependencies
@@ -125,5 +125,5 @@ Options:
 
 Examples:
   create-betternest-app my-app
-  create-betternest-app my-app --db=prisma --auth=email-password,google --pm=pnpm --yes
+  create-betternest-app my-app --db=prisma-postgresql --auth=email-password,google --pm=pnpm --yes
 `;

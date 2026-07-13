@@ -86,11 +86,20 @@ export async function generateProject(
 
   // DB-derived tokens (used by the README). DB_LABEL is the full catalog label
   // ("Prisma + PostgreSQL"); DB_ORM is just the ORM name ("Prisma"/"Drizzle").
+  // DB_DIALECT gives templates the database engine (PostgreSQL/MySQL/SQLite).
   tokens.DB_LABEL = db.manifest.label;
   tokens.DB_ORM = db.manifest.label.split(/[\s+]/).filter(Boolean)[0] ?? db.manifest.label;
+  tokens.DB_DIALECT = db.manifest.database;
 
   // ── 1. Base tree (skips composed files) ──
   copyBaseFiles(baseDir, outDir, tokens, COMPOSED);
+
+  // ── 1b. docker-compose.yml (optional, only for server databases) ──
+  const composeRel = 'docker-compose.yml';
+  const composeSrc = path.resolve(db.dir, db.manifest.filesDir, composeRel);
+  if (fs.existsSync(composeSrc)) {
+    write(outDir, composeRel, replaceTokens(fs.readFileSync(composeSrc, 'utf8'), tokens));
+  }
 
   // ── 2. DB files (packages/db/**) ──
   copyBaseFiles(path.resolve(db.dir, db.manifest.filesDir), outDir, tokens, new Set());

@@ -121,7 +121,7 @@ never silently rejected.
 
 - Node.js ≥ 20.9
 - pnpm ≥ 9 (`npm i -g pnpm`)
-- Docker (for Postgres) — or your own Postgres instance
+- Docker (for PostgreSQL or MySQL — not needed for SQLite)
 
 ### 1. Install dependencies
 
@@ -129,11 +129,11 @@ never silently rejected.
 pnpm install
 ```
 
-### 2. Start PostgreSQL
+### 2. Start the database
 
 ```bash
 cp .env.example .env        # root env feeds docker-compose
-docker compose up -d
+docker compose up -d        # skip this step for SQLite
 ```
 
 ### 3. Configure environment files

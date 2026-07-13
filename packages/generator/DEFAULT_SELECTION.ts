@@ -4,6 +4,6 @@ import type { Selection } from './src/types';
 // this selection must reproduce the Phase-0 monorepo, functionally.
 export const DEFAULT_SELECTION: Selection = {
   projectName: 'my-app',
-  db: 'prisma',
+  db: 'prisma-postgresql',
   authProviders: ['email-password', 'google', 'github'],
 };

@@ -41,12 +41,16 @@ jobs:
       - name: Packaged CLI smoke test (real .tgz)
         run: pnpm test:pack
 
-  # test:pack diffs against examples/mvp (Prisma). This job gives Drizzle the
-  # same build/lint coverage on every PR without needing a database (the API
-  # boot for both DBs is covered by the Smoke workflow on main).
-  drizzle-build:
-    name: drizzle · generate · build · lint (no DB)
+  # test:pack diffs against examples/mvp (prisma-postgresql). These jobs give
+  # the other major combos the same build/lint coverage on every PR without a
+  # database (the full boot is covered by the Smoke workflow on main).
+  non-postgresql-build:
+    name: ${{ matrix.db }} · generate · build · lint (no DB)
     runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        db: [drizzle-postgresql, drizzle-sqlite, prisma-sqlite]
     steps:
       - name: Checkout
         uses: actions/checkout@v7
@@ -66,9 +70,9 @@ jobs:
       - name: Build the CLI
         run: pnpm cli:build
 
-      - name: Scaffold a Drizzle project
+      - name: Scaffold a ${{ matrix.db }} project
         working-directory: ${{ runner.temp }}
-        run: node "$GITHUB_WORKSPACE/packages/cli/dist/index.js" my-app --yes --db=drizzle --no-install --no-git
+        run: node "$GITHUB_WORKSPACE/packages/cli/dist/index.js" my-app --yes --db=${{ matrix.db }} --no-install --no-git
 
       - name: Install generated project dependencies
         working-directory: ${{ runner.temp }}/my-app

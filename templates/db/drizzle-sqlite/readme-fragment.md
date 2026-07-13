@@ -1,0 +1,7 @@
+Drizzle tables user, session, ccount, erification (in
+packages/db/src/schema.ts) match the Better Auth adapter exactly. ole is a
+	ext column with a TypeScript-level enum constraint ('user' | 'admin',
+default 'user'). **No UI reads ole yet** — it is RBAC groundwork.
+
+SQLite stores its database file at data.db in the project root. No Docker
+is needed — just run pnpm db:push after install.

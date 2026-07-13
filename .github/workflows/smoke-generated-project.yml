@@ -16,7 +16,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        db: [prisma, drizzle]
+        db: [prisma-postgresql, drizzle-postgresql, prisma-sqlite, drizzle-sqlite]
     env:
       DATABASE_URL: postgresql://postgres:postgres@localhost:5432/my_app?schema=public
       BETTER_AUTH_SECRET: ci-smoke-not-a-real-secret-0123456789abcdef
