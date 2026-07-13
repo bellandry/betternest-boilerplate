@@ -1,5 +1,12 @@
 # create-betternest-app
 
+## 0.3.0
+
+### Minor Changes
+
+- 59e930a: Add **Drizzle** as a database choice (`--db=drizzle`). It scaffolds a `@repo/db` package backed by Drizzle ORM + node-postgres with the Better Auth schema (`user`/`session`/`account`/`verification` + `role` enum), `drizzle-kit` tooling (`db:push`/`db:generate`/`db:studio`/`db:migrate`), and Better Auth's Drizzle adapter — functionally identical to the Prisma option. Prisma stays the default. The generated README now reflects whichever database you pick.
+- 9181791: Add email verification and password reset to the email-password provider. Generated projects now ship a new swappable `@repo/email` package with pluggable drivers — **Resend** or **SMTP/nodemailer**, selected via `EMAIL_PROVIDER` — plus forgot-password / reset-password pages, verification-aware sign-in and sign-up (with a rate-limited "resend verification" action), failed-send logging, and email env config. All of it is added only when the email-password provider is selected.
+
 ## 0.2.2
 
 ### Patch Changes
