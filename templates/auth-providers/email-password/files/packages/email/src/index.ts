@@ -37,16 +37,40 @@ export async function sendEmail({
   subject,
   html,
 }: EmailPayload): Promise<void> {
-  // Resend requires a verified sender. In development you can use
-  // "onboarding@resend.dev" (Resend) — but it only delivers to your own Resend
-  // account address; use SMTP (e.g. Mailpit) to test arbitrary recipients.
-  const from = process.env.EMAIL_FROM ?? 'onboarding@resend.dev';
+  const from = process.env.EMAIL_FROM;
+  if (!from) {
+    throw new Error(
+      'EMAIL_FROM is not set — a verified sender address is required. ' +
+        'For Resend: a verified domain (e.g. noreply@yourdomain.com). ' +
+        'For SMTP/Gmail: your Gmail address. See apps/api/.env.example.',
+    );
+  }
+
+  // Warn once if the default from the .env.example was never changed.
+  if (from === 'onboarding@resend.dev') {
+    // eslint-disable-next-line no-console
+    console.warn(
+      '[@repo/email] EMAIL_FROM is still "onboarding@resend.dev" — this ' +
+        'Resend testing address only delivers to your own Resend account ' +
+        'email. Set EMAIL_FROM to a verified domain to reach real users.',
+    );
+  }
+
+  const provider = (process.env.EMAIL_PROVIDER ?? 'resend').toLowerCase();
+  // eslint-disable-next-line no-console
+  console.log(
+    `[@repo/email] Sending to ${to} via ${provider} from ${from}`,
+  );
+
   try {
     await getDriver().send({ from, to, subject, html });
+    // eslint-disable-next-line no-console
+    console.log(`[@repo/email] Email accepted by ${provider} for ${to}`);
   } catch (err) {
     // Better Auth swallows errors thrown from its email callbacks, so without
     // this an email misconfiguration is invisible (no email, no trace). Make
     // the real cause loud in the server logs.
+    // eslint-disable-next-line no-console
     console.error('[@repo/email] Failed to send email:', err);
     throw err;
   }

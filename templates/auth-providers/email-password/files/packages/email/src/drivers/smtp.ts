@@ -18,13 +18,24 @@ export function createSmtpDriver(): EmailDriver {
     host,
     port,
     // Port 465 is implicit TLS; 587/25 use STARTTLS. Override with SMTP_SECURE.
-    secure: process.env.SMTP_SECURE ? process.env.SMTP_SECURE === 'true' : port === 465,
+    secure:
+      process.env.SMTP_SECURE
+        ? process.env.SMTP_SECURE === 'true'
+        : port === 465,
     auth: user && pass ? { user, pass } : undefined,
   });
 
   return {
     async send({ from, to, subject, html }) {
-      await transport.sendMail({ from, to, subject, html });
+      // eslint-disable-next-line no-console
+      console.log(
+        `[@repo/email] [smtp] Connecting to ${host}:${port}...`,
+      );
+      const info = await transport.sendMail({ from, to, subject, html });
+      // eslint-disable-next-line no-console
+      console.log(
+        `[@repo/email] [smtp] Accepted — messageId: ${info.messageId}`,
+      );
     },
   };
 }

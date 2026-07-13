@@ -22,7 +22,11 @@ export function createSmtpDriver(): EmailDriver {
 
   return {
     async send({ from, to, subject, html }) {
-      await transport.sendMail({ from, to, subject, html });
+      // eslint-disable-next-line no-console
+      console.log(`[@repo/email] [smtp] Connecting to ${host}:${port}...`);
+      const info = await transport.sendMail({ from, to, subject, html });
+      // eslint-disable-next-line no-console
+      console.log(`[@repo/email] [smtp] Accepted — messageId: ${info.messageId}`);
     },
   };
 }
