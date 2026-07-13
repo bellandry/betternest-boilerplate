@@ -1,12 +1,12 @@
 import { confirm } from '@clack/prompts';
-import { listAuthProviders, listDatabases, type CatalogEntry } from '@repo/generator/catalog';
+import { listAuthProviders, listDatabases, listDbEngines, type CatalogEntry } from '@repo/generator/catalog';
 import { DEFAULT_SELECTION } from '@repo/generator/default-selection';
 import type { Selection } from '@repo/generator/types';
 import { CliError } from './errors';
 import type { PackageManager, RawFlags } from './flags';
 import { validateProjectName } from './prompts/project-name';
 import { promptProjectName } from './prompts/project-name';
-import { promptDatabase } from './prompts/database';
+import { promptDbEngine, promptDbCombo } from './prompts/database';
 import { promptAuthProviders, REQUIRED_PROVIDER } from './prompts/auth-providers';
 import {
   detectPackageManager,
@@ -103,7 +103,24 @@ export async function resolvePlan(flags: RawFlags, templatesDir: string): Promis
 
   // ── Interactive ── (provided flags pre-fill; positional name skips its prompt)
   const projectName = flags.projectName ?? (await promptProjectName());
-  const db = await promptDatabase(dbs, flags.db ?? DEFAULT_SELECTION.db);
+
+  // Two-phase DB: pick engine then ORM. The --db flag is a combo id, so if
+  // it was provided (and validated) we skip both prompts entirely.
+  let db: string;
+  if (flags.db) {
+    db = flags.db;
+  } else {
+    const engines = await listDbEngines({ templatesDir });
+    // Default to SQLite (first in the sorted list) unless the default-selection
+    // combo maps to a different engine.
+    const defaultEngine = (() => {
+      const entry = dbs.find((d) => d.id === DEFAULT_SELECTION.db);
+      return entry ? (entry.database ?? '').toLowerCase().replace(/\s+/g, '-') : 'sqlite';
+    })();
+    const engine = await promptDbEngine(engines, defaultEngine);
+    db = await promptDbCombo(dbs, engine, DEFAULT_SELECTION.db);
+  }
+
   const authProviders = ensureRequired(
     await promptAuthProviders(providers, flags.auth ?? DEFAULT_SELECTION.authProviders),
     providers,

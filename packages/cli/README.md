@@ -7,7 +7,7 @@ CORS, session cookies, and `trustedOrigins` non-issues.
 ```bash
 npx create-betternest-app my-app
 # or fully scripted:
-npx create-betternest-app my-app --db=prisma --auth=email-password,google,github --pm=pnpm --yes
+npx create-betternest-app my-app --db=prisma-postgresql --auth=email-password,google,github --pm=pnpm --yes
 ```
 
 The CLI contains **no template logic** — it collects a selection and calls
@@ -19,7 +19,7 @@ their status) is read from the generator's catalog.
 | Flag             | Values                                    | Default            | Description                                              |
 | ---------------- | ----------------------------------------- | ------------------ | -------------------------------------------------------- |
 | `[project-name]` | valid npm/folder name                     | prompted           | Positional. Pre-fills and skips the name prompt.         |
-| `--db`           | `prisma`, `drizzle`                        | `prisma`           | Database template id.                                    |
+| `--db`           | `prisma-postgresql`, `drizzle-sqlite`, …   | `prisma-postgresql` | ORM-engine combo id (catalog-driven). |
 | `--auth`         | `email-password,google,github` (CSV)      | all three          | Auth provider ids. `email-password` is always included.  |
 | `--pm`           | `pnpm` \| `npm` \| `yarn` \| `bun`        | detected → `pnpm`  | Package manager for install + printed commands.          |
 | `--no-install`   | —                                         | install runs       | Skip dependency installation.                            |

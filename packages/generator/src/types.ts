@@ -55,12 +55,17 @@ export interface ProviderManifest {
   readmeSetupPath?: string;
 }
 
-// A database choice (Prisma, Drizzle, ...).
+// A database choice (an ORM + database engine combination, e.g. prisma-sqlite).
 export interface DbManifest {
   id: string;
   label: string;
   // Defaults to 'available' when omitted.
   status?: TemplateStatus;
+  // SQL-engine label (PostgreSQL, MySQL, SQLite). Used by the CLI to build the
+  // two-phase prompt (pick engine → pick ORM). The generator ignores this.
+  database: string;
+  // ORM name (Prisma, Drizzle). Used alongside `database` by the CLI prompt.
+  ormName: string;
   // Directory whose contents are copied verbatim into the project root
   // (e.g. packages/db/**). .hbs files are token-substituted + de-suffixed.
   filesDir: string;
