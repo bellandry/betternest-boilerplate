@@ -1,6 +1,6 @@
 {
   "name": "create-betternest-app",
-  "version": "0.3.0",
+  "version": "0.3.1",
   "description": "Scaffold a production-ready Next.js + NestJS + Better Auth monorepo with zero CORS, cookie, and trustedOrigins pain.",
   "keywords": [
     "nextjs",
