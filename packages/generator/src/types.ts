@@ -71,6 +71,8 @@ export interface DbManifest {
   // Injected into packages/auth/src/index.ts DB markers.
   adapterImportFragmentPath: string;
   adapterConfigFragmentPath: string;
+  // Injected into the README DB_NOTES marker (data-model / DB-specific notes).
+  readmeFragmentPath?: string;
 }
 
 export interface Selection {

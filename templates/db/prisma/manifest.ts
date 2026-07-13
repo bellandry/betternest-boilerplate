@@ -8,6 +8,7 @@ const manifest: DbManifest = {
   envFragmentPath: 'env.fragment.txt',
   adapterImportFragmentPath: 'adapter-import.fragment.ts',
   adapterConfigFragmentPath: 'adapter-config.fragment.ts',
+  readmeFragmentPath: 'readme-fragment.md',
 };
 
 export default manifest;

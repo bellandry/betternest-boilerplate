@@ -40,3 +40,44 @@ jobs:
 
       - name: Packaged CLI smoke test (real .tgz)
         run: pnpm test:pack
+
+  # test:pack diffs against examples/mvp (Prisma). This job gives Drizzle the
+  # same build/lint coverage on every PR without needing a database (the API
+  # boot for both DBs is covered by the Smoke workflow on main).
+  drizzle-build:
+    name: drizzle · generate · build · lint (no DB)
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v4
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: pnpm
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Build the CLI
+        run: pnpm cli:build
+
+      - name: Scaffold a Drizzle project
+        working-directory: ${{ runner.temp }}
+        run: node "$GITHUB_WORKSPACE/packages/cli/dist/index.js" my-app --yes --db=drizzle --no-install --no-git
+
+      - name: Install generated project dependencies
+        working-directory: ${{ runner.temp }}/my-app
+        run: pnpm install
+
+      - name: Build (no database needed)
+        working-directory: ${{ runner.temp }}/my-app
+        run: pnpm build
+
+      - name: Lint
+        working-directory: ${{ runner.temp }}/my-app
+        run: pnpm lint

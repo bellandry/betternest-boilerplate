@@ -84,6 +84,11 @@ export async function generateProject(
   const credentials = providers.filter((p) => p.manifest.kind === 'credential');
   const oauth = providers.filter((p) => p.manifest.kind === 'oauth');
 
+  // DB-derived tokens (used by the README). DB_LABEL is the full catalog label
+  // ("Prisma + PostgreSQL"); DB_ORM is just the ORM name ("Prisma"/"Drizzle").
+  tokens.DB_LABEL = db.manifest.label;
+  tokens.DB_ORM = db.manifest.label.split(/[\s+]/).filter(Boolean)[0] ?? db.manifest.label;
+
   // ── 1. Base tree (skips composed files) ──
   copyBaseFiles(baseDir, outDir, tokens, COMPOSED);
 
@@ -193,6 +198,11 @@ export async function generateProject(
   write(
     outDir,
     'README.md',
-    injectMarkers(readBase(baseDir, 'README.md.hbs', tokens), { AUTH_SETUP_STEPS: setupSteps }),
+    injectMarkers(readBase(baseDir, 'README.md.hbs', tokens), {
+      AUTH_SETUP_STEPS: setupSteps,
+      DB_NOTES: db.manifest.readmeFragmentPath
+        ? readFrag(db.dir, db.manifest.readmeFragmentPath, tokens).trim()
+        : '',
+    }),
   );
 }

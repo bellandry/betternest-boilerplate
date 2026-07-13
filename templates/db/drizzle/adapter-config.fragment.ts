@@ -1,1 +1,1 @@
-// TODO(phase-fast-follow): database: drizzleAdapter(db, { provider: 'pg' }),
+database: drizzleAdapter(db, { provider: 'pg', schema }),
