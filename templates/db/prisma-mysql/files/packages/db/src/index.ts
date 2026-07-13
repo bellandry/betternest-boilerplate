@@ -1,17 +1,23 @@
-import { PrismaClient } from '@prisma/client';
+import { PrismaClient } from '../generated/prisma/client'
+import { PrismaMariaDb } from '@prisma/adapter-mariadb'
 
 const globalForPrisma = globalThis as unknown as {
-  prisma: PrismaClient | undefined;
-};
+  prisma: PrismaClient | undefined
+}
+
+const adapter = new PrismaMariaDb({
+  connectionString: process.env.DATABASE_URL!,
+})
 
 export const prisma =
   globalForPrisma.prisma ??
   new PrismaClient({
     log: process.env.NODE_ENV === 'development' ? ['error', 'warn'] : ['error'],
-  });
+    adapter,
+  })
 
 if (process.env.NODE_ENV !== 'production') {
-  globalForPrisma.prisma = prisma;
+  globalForPrisma.prisma = prisma
 }
 
-export * from '@prisma/client';
+export * from '../generated/prisma/client'

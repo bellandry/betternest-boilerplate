@@ -1,12 +1,12 @@
-import fs from 'node:fs';
-import path from 'node:path';
-import { defineConfig } from 'prisma/config';
-
-const rootEnv = path.join(__dirname, '..', '..', '.env');
-if (fs.existsSync(rootEnv)) {
-  process.loadEnvFile(rootEnv);
-}
+import 'dotenv/config'
+import { defineConfig, env } from 'prisma/config'
 
 export default defineConfig({
-  schema: path.join('prisma', 'schema.prisma'),
-});
+  schema: 'prisma/schema.prisma',
+  migrations: {
+    path: 'prisma/migrations',
+  },
+  datasource: {
+    url: env('DATABASE_URL'),
+  },
+})

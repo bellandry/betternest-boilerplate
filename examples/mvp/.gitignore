@@ -11,7 +11,7 @@ build
 .env.*.local
 
 # prisma
-packages/db/prisma/generated
+packages/db/generated
 
 # test / tooling artifacts
 .playwright-mcp

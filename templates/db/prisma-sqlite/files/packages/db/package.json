@@ -2,12 +2,12 @@
   "name": "@repo/db",
   "version": "0.1.0",
   "private": true,
-  "main": "./dist/index.js",
-  "types": "./dist/index.d.ts",
+  "main": "./dist/src/index.js",
+  "types": "./dist/src/index.d.ts",
   "exports": {
     ".": {
-      "types": "./dist/index.d.ts",
-      "default": "./dist/index.js"
+      "types": "./dist/src/index.d.ts",
+      "default": "./dist/src/index.js"
     }
   },
   "scripts": {
@@ -18,10 +18,13 @@
     "db:migrate": "prisma migrate dev"
   },
   "dependencies": {
-    "@prisma/client": "^6.1.0"
+    "@prisma/adapter-better-sqlite3": "^7.0.0",
+    "@prisma/client": "^7.0.0",
+    "better-sqlite3": "^11.0.0",
+    "dotenv": "^16.4.0"
   },
   "devDependencies": {
-    "prisma": "^6.1.0",
+    "prisma": "^7.0.0",
     "@repo/typescript-config": "workspace:*",
     "@types/node": "^22.10.1",
     "typescript": "^5.6.3"
