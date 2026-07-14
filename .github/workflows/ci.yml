@@ -51,6 +51,8 @@ jobs:
       fail-fast: false
       matrix:
         db: [drizzle-postgresql, drizzle-sqlite, prisma-sqlite]
+    env:
+      DATABASE_URL: file:./data.db
     steps:
       - name: Checkout
         uses: actions/checkout@v7

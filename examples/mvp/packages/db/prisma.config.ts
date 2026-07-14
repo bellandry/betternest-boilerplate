@@ -1,12 +1,18 @@
-import fs from 'node:fs';
+import { config } from 'dotenv';
 import path from 'node:path';
-import { defineConfig } from 'prisma/config';
+import { defineConfig, env } from 'prisma/config';
 
-const rootEnv = path.join(__dirname, '..', '..', '.env');
-if (fs.existsSync(rootEnv)) {
-  process.loadEnvFile(rootEnv);
-}
+const resolve = (...segments: string[]) => path.resolve(__dirname, '..', '..', ...segments);
+
+config({ path: resolve('.env') });
+config({ path: resolve('apps', 'api', '.env') });
 
 export default defineConfig({
-  schema: path.join('prisma', 'schema.prisma'),
+  schema: 'prisma/schema.prisma',
+  migrations: {
+    path: 'prisma/migrations',
+  },
+  datasource: {
+    url: env('DATABASE_URL'),
+  },
 });
