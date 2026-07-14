@@ -5,7 +5,7 @@ import 'dotenv/config';
 import { NestFactory } from '@nestjs/core';
 import { type NestExpressApplication } from '@nestjs/platform-express';
 import { json } from 'express';
-import { AppModule } from './app.module';
+import { AppModule } from './app.module.js';
 
 async function bootstrap() {
   // ── The #1 trap: NestJS's global body parser consumes the request stream.

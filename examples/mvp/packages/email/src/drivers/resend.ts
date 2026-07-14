@@ -1,5 +1,5 @@
 import { Resend } from 'resend';
-import type { EmailDriver } from '../types';
+import type { EmailDriver } from '../types.js';
 
 // Resend driver. The only file in the monorepo that imports the Resend SDK.
 export function createResendDriver(): EmailDriver {
