@@ -1,5 +1,5 @@
 ---
-"create-betternest-app": major
+"create-betternest-app": minor
 ---
 
 Upgrade all Prisma templates from v6 to v7.
