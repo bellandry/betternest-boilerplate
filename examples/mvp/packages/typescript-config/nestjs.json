@@ -3,7 +3,7 @@
   "display": "NestJS",
   "extends": "./base.json",
   "compilerOptions": {
-    "module": "CommonJS",
+    "module": "Node16",
     "moduleResolution": "Node16",
     "emitDecoratorMetadata": true,
     "experimentalDecorators": true,
