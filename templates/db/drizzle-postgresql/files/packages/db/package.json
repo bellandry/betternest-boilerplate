@@ -26,6 +26,6 @@
     "@repo/typescript-config": "workspace:*",
     "@types/node": "^26.1.1",
     "@types/pg": "^8.20.0",
-    "typescript": "^7.0.2"
+    "typescript": "^5.9.3"
   }
 }
