@@ -1,8 +1,8 @@
-import type { EmailDriver, EmailPayload } from './types';
-import { createResendDriver } from './drivers/resend';
-import { createSmtpDriver } from './drivers/smtp';
+import type { EmailDriver, EmailPayload } from './types.js';
+import { createResendDriver } from './drivers/resend.js';
+import { createSmtpDriver } from './drivers/smtp.js';
 
-export type { EmailPayload } from './types';
+export type { EmailPayload } from './types.js';
 
 // ── The single email seam for the whole monorepo ──
 // Nothing outside this package imports a provider SDK (Resend, nodemailer, ...).
