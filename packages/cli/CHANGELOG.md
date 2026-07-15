@@ -1,5 +1,13 @@
 # create-betternest-app
 
+## 0.6.1
+
+### Patch Changes
+
+- baa6efc: Publish cross-host deployment artifacts: Dockerfile, docker-entrypoint.sh,
+  .dockerignore, health checks, platform configs (Vercel, Railway, Fly.io,
+  Render), DEPLOYMENT.md guide, and VERCEL_URL trustedOrigins support.
+
 ## 0.6.0
 
 ### Minor Changes
