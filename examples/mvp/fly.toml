@@ -1,0 +1,27 @@
+# ── Fly.io config ──────────────────────────────────────────────────────
+# Run `fly launch` to fill in the app name and primary region, or edit
+# them manually below. Everything else is ready to go.
+#
+# app = "your-app-name"
+# primary_region = "cdg"   # Paris (change to nearest region)
+
+[build]
+  dockerfile = "apps/api/Dockerfile"
+  # The Dockerfile needs the full monorepo for turbo prune, so the build
+  # context MUST be the repository root.
+  buildpacks = []
+
+[http_service]
+  internal_port = 4000
+  force_https = true
+  auto_stop_machines = "stop"
+  auto_start_machines = true
+  min_machines_running = 1
+
+  [[http_service.checks]]
+    interval = "15s"
+    timeout = "5s"
+    grace_period = "10s"
+    method = "GET"
+    path = "/api/health"
+    protocol = "http"

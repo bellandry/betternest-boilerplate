@@ -1,0 +1,52 @@
+# ── Render Blueprint ──────────────────────────────────────────────────
+# Connects via "Connect a repository" on the Render dashboard.
+# Render automatically provisions the Postgres instance (pserv) and
+# injects DATABASE_URL into the web service environment.
+#
+# Secrets (marked sync: false) must be set manually in the Render
+# dashboard under Environment > Environment Variables for the web service.
+#
+# https://render.com/docs/blueprint-spec
+
+services:
+  - type: web
+    name: api
+    runtime: docker
+    dockerContext: .
+    dockerfilePath: apps/api/Dockerfile
+    plan: starter
+    healthCheckPath: /api/health
+    envVars:
+      - key: DATABASE_URL
+        fromService:
+          type: pserv
+          name: db
+          property: connectionString
+      - key: BETTER_AUTH_SECRET
+        sync: false
+      - key: WEB_URL
+        sync: false
+      - key: PORT
+        value: "4000"
+      - key: EMAIL_FROM
+        sync: false
+      - key: EMAIL_PROVIDER
+        value: resend
+
+  - type: pserv
+    name: db
+    runtime: image
+    plan: starter
+    image:
+      image: postgres:16-alpine
+    disk:
+      name: data
+      mountPath: /var/lib/postgresql/data
+      sizeGB: 1
+    envVars:
+      - key: POSTGRES_USER
+        value: postgres
+      - key: POSTGRES_PASSWORD
+        generateValue: true
+      - key: POSTGRES_DB
+        value: app
