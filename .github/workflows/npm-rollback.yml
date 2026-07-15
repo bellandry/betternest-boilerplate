@@ -1,0 +1,25 @@
+name: NPM Rollback (deprecate + reset latest)
+
+on: workflow_dispatch
+
+jobs:
+  rollback:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Setup Node
+        uses: actions/setup-node@v6
+        with:
+          node-version: 20
+          registry-url: "https://registry.npmjs.org"
+
+      - name: Deprecate 0.6.0 and 0.6.1
+        run: |
+          npm deprecate create-betternest-app@0.6.1 "Broken — Use 0.5.0 or the latest release."
+          npm deprecate create-betternest-app@0.6.0 "Broken — Use 0.5.0 or the latest release."
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+
+      - name: Reset latest dist-tag to 0.5.0
+        run: npm dist-tag add create-betternest-app@0.5.0 latest
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
