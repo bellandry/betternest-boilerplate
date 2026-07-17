@@ -2,10 +2,13 @@ import { config } from 'dotenv';
 import path from 'node:path';
 import { defineConfig, env } from 'prisma/config';
 
-const resolve = (...segments: string[]) => path.resolve(__dirname, '..', '..', ...segments);
+config({ path: path.resolve(__dirname, '..', '..', '.env') });
 
-config({ path: resolve('.env') });
-config({ path: resolve('apps', 'api', '.env') });
+// Resolve relative file: paths so SQLite always writes to the project root.
+if (process.env.DATABASE_URL?.startsWith('file:./')) {
+  const rel = process.env.DATABASE_URL.slice('file:'.length);
+  process.env.DATABASE_URL = `file:${path.resolve(__dirname, '..', '..', rel)}`;
+}
 
 export default defineConfig({
   schema: 'prisma/schema.prisma',

@@ -129,31 +129,29 @@ never silently rejected.
 pnpm install
 ```
 
-### 2. Start the database
+### 2. Configure environment
 
 ```bash
-cp .env.example .env        # root env feeds docker-compose
-docker compose up -d        # skip this step for SQLite
-```
-
-### 3. Configure environment files
-
-```bash
-cp apps/api/.env.example apps/api/.env
+cp .env.example .env          # root .env is the single source of truth
 cp apps/web/.env.example apps/web/.env
 ```
 
 Generate a secret for the API:
 
 ```bash
-openssl rand -base64 32     # paste into BETTER_AUTH_SECRET in apps/api/.env
+openssl rand -base64 32       # paste into BETTER_AUTH_SECRET in .env
 ```
+
+Start the database (skip for SQLite):
+
+````bash
+docker compose up -d
 
 ### 4. Push the database schema
 
 ```bash
 pnpm db:push
-```
+````
 
 ### 5. Run everything
 
