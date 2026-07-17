@@ -1,5 +1,5 @@
 import type { Metadata } from 'next';
-import '@repo/ui/globals.css';
+import './globals.css';
 
 export const metadata: Metadata = {
   title: 'my-app — Next.js + NestJS + Better Auth',
