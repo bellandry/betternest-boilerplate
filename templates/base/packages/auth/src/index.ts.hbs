@@ -25,12 +25,7 @@ export const auth = betterAuth({
 
   // Only the Next.js origin may drive the auth flow.
   // NEVER use '*' here — it silently accepts hostile origins.
-  // Vercel preview deployments get their own origin injected automatically
-  // via VERCEL_URL so that preview branches can sign in without CORS errors.
-  trustedOrigins: [
-    process.env.WEB_URL ?? 'http://localhost:3000',
-    ...(process.env.VERCEL_URL ? [`https://${process.env.VERCEL_URL}`] : []),
-  ],
+  trustedOrigins: [process.env.WEB_URL ?? 'http://localhost:3000'],
 
   user: {
     additionalFields: {

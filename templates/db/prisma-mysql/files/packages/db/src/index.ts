@@ -21,7 +21,3 @@ if (process.env.NODE_ENV !== 'production') {
 }
 
 export * from '../generated/prisma/client'
-
-export async function ping(): Promise<void> {
-  await prisma.$queryRawUnsafe('SELECT 1')
-}

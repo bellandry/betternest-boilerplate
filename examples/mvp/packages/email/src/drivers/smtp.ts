@@ -1,5 +1,5 @@
 import nodemailer from 'nodemailer';
-import type { EmailDriver } from '../types';
+import type { EmailDriver } from '../types.js';
 
 // SMTP driver (nodemailer). Works with any SMTP server: Gmail, Postmark,
 // Mailgun, Amazon SES, or a local catcher like Mailpit/Mailhog in development.
