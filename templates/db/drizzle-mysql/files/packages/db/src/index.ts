@@ -6,7 +6,7 @@ const globalForDb = globalThis as unknown as { pool: mysql.Pool | undefined };
 const pool = globalForDb.pool ?? mysql.createPool(process.env.DATABASE_URL!);
 if (process.env.NODE_ENV !== 'production') { globalForDb.pool = pool; }
 
-export const db = drizzle(pool, { schema: tables });
+export const db = drizzle(pool, { schema: tables, mode: 'default' });
 export const schema = { user: tables.user, session: tables.session, account: tables.account, verification: tables.verification };
 export * from './schema';
 

@@ -7,15 +7,13 @@ import {
   varchar,
 } from 'drizzle-orm/mysql-core';
 
-export const roleEnum = mysqlEnum('role', ['user', 'admin']);
-
 export const user = mysqlTable('user', {
   id: varchar('id', { length: 36 }).primaryKey(),
   name: varchar('name', { length: 255 }).notNull(),
   email: varchar('email', { length: 255 }).notNull().unique(),
   emailVerified: boolean('email_verified').notNull().default(false),
   image: text('image'),
-  role: roleEnum('role').notNull().default('user'),
+  role: mysqlEnum('role', ['user', 'admin']).notNull().default('user'),
   createdAt: timestamp('created_at').notNull().defaultNow(),
   updatedAt: timestamp('updated_at')
     .notNull()

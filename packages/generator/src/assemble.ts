@@ -13,7 +13,7 @@ import { DEFAULT_TEMPLATES_DIR, loadManifest } from './manifests';
 const COMPOSED = new Set<string>([
   'package.json',
   'README.md',
-  'apps/api/.env.example',
+  '.env.example',
   'packages/auth/package.json',
   'packages/auth/src/index.ts',
   'apps/web/app/(auth)/sign-in/page.tsx',
@@ -180,15 +180,15 @@ export async function generateProject(
     }),
   );
 
-  // ── 6. apps/api/.env.example (base skeleton + db + providers) ──
+  // ── 6. .env.example (root skeleton + db + providers) ──
   const dbEnv = db.manifest.envFragmentPath ? readFrag(db.dir, db.manifest.envFragmentPath, tokens) : '';
   const providerEnvs = providers
     .filter((p) => p.manifest.envFragmentPath)
     .map((p) => readFrag(p.dir, p.manifest.envFragmentPath as string, tokens));
   write(
     outDir,
-    'apps/api/.env.example',
-    mergeEnvFile(readBase(baseDir, 'apps/api/.env.example.hbs', tokens), dbEnv, providerEnvs),
+    '.env.example',
+    mergeEnvFile(readBase(baseDir, '.env.example.hbs', tokens), dbEnv, providerEnvs),
   );
 
   // ── 7. root package.json (base + db scripts fragment) ──

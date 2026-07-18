@@ -12,6 +12,7 @@
     "moduleDetection": "force",
     "isolatedModules": true,
     "incremental": true,
+    "types": ["node"],
     "declaration": true,
     "declarationMap": true
   },

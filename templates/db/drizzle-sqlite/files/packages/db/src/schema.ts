@@ -11,31 +11,31 @@ export const user = sqliteTable('user', {
   emailVerified: integer('email_verified', { mode: 'boolean' }).notNull().default(false),
   image: text('image'),
   role: text('role', { enum: ['user', 'admin'] }).notNull().default('user'),
-  createdAt: text('created_at')
+  createdAt: integer('created_at', { mode: 'timestamp' })
     .notNull()
-    .$defaultFn(() => new Date().toISOString()),
-  updatedAt: text('updated_at')
+    .$defaultFn(() => new Date()),
+  updatedAt: integer('updated_at', { mode: 'timestamp' })
     .notNull()
-    .$defaultFn(() => new Date().toISOString())
-    .$onUpdateFn(() => new Date().toISOString()),
+    .$defaultFn(() => new Date())
+    .$onUpdateFn(() => new Date()),
 });
 
 export const session = sqliteTable('session', {
   id: text('id').primaryKey(),
-  expiresAt: text('expires_at').notNull(),
+  expiresAt: integer('expires_at', { mode: 'timestamp' }).notNull(),
   token: text('token').notNull().unique(),
   ipAddress: text('ip_address'),
   userAgent: text('user_agent'),
   userId: text('user_id')
     .notNull()
     .references(() => user.id, { onDelete: 'cascade' }),
-  createdAt: text('created_at')
+  createdAt: integer('created_at', { mode: 'timestamp' })
     .notNull()
-    .$defaultFn(() => new Date().toISOString()),
-  updatedAt: text('updated_at')
+    .$defaultFn(() => new Date()),
+  updatedAt: integer('updated_at', { mode: 'timestamp' })
     .notNull()
-    .$defaultFn(() => new Date().toISOString())
-    .$onUpdateFn(() => new Date().toISOString()),
+    .$defaultFn(() => new Date())
+    .$onUpdateFn(() => new Date()),
 });
 
 export const account = sqliteTable('account', {
@@ -48,29 +48,29 @@ export const account = sqliteTable('account', {
   accessToken: text('access_token'),
   refreshToken: text('refresh_token'),
   idToken: text('id_token'),
-  accessTokenExpiresAt: text('access_token_expires_at'),
-  refreshTokenExpiresAt: text('refresh_token_expires_at'),
+  accessTokenExpiresAt: integer('access_token_expires_at', { mode: 'timestamp' }),
+  refreshTokenExpiresAt: integer('refresh_token_expires_at', { mode: 'timestamp' }),
   scope: text('scope'),
   password: text('password'),
-  createdAt: text('created_at')
+  createdAt: integer('created_at', { mode: 'timestamp' })
     .notNull()
-    .$defaultFn(() => new Date().toISOString()),
-  updatedAt: text('updated_at')
+    .$defaultFn(() => new Date()),
+  updatedAt: integer('updated_at', { mode: 'timestamp' })
     .notNull()
-    .$defaultFn(() => new Date().toISOString())
-    .$onUpdateFn(() => new Date().toISOString()),
+    .$defaultFn(() => new Date())
+    .$onUpdateFn(() => new Date()),
 });
 
 export const verification = sqliteTable('verification', {
   id: text('id').primaryKey(),
   identifier: text('identifier').notNull(),
   value: text('value').notNull(),
-  expiresAt: text('expires_at').notNull(),
-  createdAt: text('created_at')
+  expiresAt: integer('expires_at', { mode: 'timestamp' }).notNull(),
+  createdAt: integer('created_at', { mode: 'timestamp' })
     .notNull()
-    .$defaultFn(() => new Date().toISOString()),
-  updatedAt: text('updated_at')
+    .$defaultFn(() => new Date()),
+  updatedAt: integer('updated_at', { mode: 'timestamp' })
     .notNull()
-    .$defaultFn(() => new Date().toISOString())
-    .$onUpdateFn(() => new Date().toISOString()),
+    .$defaultFn(() => new Date())
+    .$onUpdateFn(() => new Date()),
 });
