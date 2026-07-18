@@ -1,5 +1,13 @@
 # create-betternest-app
 
+## 0.6.3
+
+### Patch Changes
+
+- d438ac3: Update README with deployment guide: Vercel, Railway, Fly.io, Render, VPS
+  (Docker Compose + Ansible). Add database combo table, flags reference,
+  and local development instructions.
+
 ## 0.6.0
 
 ### Minor Changes
