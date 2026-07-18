@@ -6,39 +6,203 @@ CORS, session cookies, and `trustedOrigins` non-issues.
 
 ```bash
 npx create-betternest-app my-app
-# or fully scripted:
-npx create-betternest-app my-app --db=prisma-postgresql --auth=email-password,google,github --pm=pnpm --yes
 ```
 
-The CLI contains **no template logic** — it collects a selection and calls
-`@repo/generator`. All template knowledge (which databases/providers exist,
-their status) is read from the generator's catalog.
+## What you get
+
+- **Next.js 16** frontend with Tailwind CSS v4, shadcn/ui components
+- **NestJS 11** backend with Express 5
+- **Better Auth** — email/password + Google + GitHub OAuth, email verification,
+  password reset, session management
+- **6 database combos** — PostgreSQL, MySQL, or SQLite with Prisma OR Drizzle
+- **Zero CORS** — same-origin proxy via Next.js rewrites, no cross-site cookies
+- **Trusted origins** dynamic — Vercel preview deployments work out of the box
+- **Health endpoints** — `/api/health` (no DB) and `/api/health/db` (ping)
+- **Monorepo** — Turborepo, pnpm workspaces, shared packages (`@repo/ui`, `@repo/auth`, `@repo/db`, `@repo/email`)
+
+## Usage
+
+```bash
+# Interactive
+npx create-betternest-app my-app
+
+# Scripted — pick a database and auth providers
+npx create-betternest-app my-app --db=prisma-sqlite --yes
+
+# All flags
+npx create-betternest-app my-app \
+  --db=prisma-postgresql \
+  --auth=email-password,google,github \
+  --pm=pnpm \
+  --yes
+```
 
 ## Flags
 
-| Flag             | Values                                    | Default            | Description                                              |
-| ---------------- | ----------------------------------------- | ------------------ | -------------------------------------------------------- |
-| `[project-name]` | valid npm/folder name                     | prompted           | Positional. Pre-fills and skips the name prompt.         |
-| `--db`           | `prisma-postgresql`, `drizzle-sqlite`, …   | `prisma-postgresql` | ORM-engine combo id (catalog-driven). |
-| `--auth`         | `email-password,google,github` (CSV)      | all three          | Auth provider ids. `email-password` is always included.  |
-| `--pm`           | `pnpm` \| `npm` \| `yarn` \| `bun`        | detected → `pnpm`  | Package manager for install + printed commands.          |
-| `--no-install`   | —                                         | install runs       | Skip dependency installation.                            |
-| `--no-git`       | —                                         | git init runs      | Skip `git init` + first commit.                          |
-| `-y`, `--yes`    | —                                         | interactive        | Skip all prompts; use defaults + provided flags.         |
-| `-v`, `--verbose`| —                                         | off                | Print full stack traces on error.                        |
-| `-h`, `--help`   | —                                         | —                  | Show usage.                                              |
+| Flag | Values | Default | Description |
+|---|---|---|---|
+| `[project-name]` | valid npm/folder name | prompted | Positional |
+| `--db` | `prisma-postgresql`, `prisma-mysql`, `prisma-sqlite`, `drizzle-postgresql`, `drizzle-mysql`, `drizzle-sqlite` | prompted (default: SQLite) | ORM-engine combo |
+| `--auth` | `email-password,google,github` (CSV) | all three | Auth providers |
+| `--pm` | `pnpm`, `npm`, `yarn`, `bun` | `pnpm` | Package manager |
+| `--no-install` | — | runs install | Skip dependency install |
+| `--no-git` | — | runs `git init` | Skip git init |
+| `-y`, `--yes` | — | interactive | Skip prompts |
+| `-h`, `--help` | — | — | Show help |
 
-Notes:
+## Database combos
 
-- Invalid values fail fast with a non-zero exit and a list of valid values.
-- An existing non-empty target directory is never overwritten silently:
-  interactively you confirm; with `--yes` it errors.
+| ID | Engine | ORM | Docker needed |
+|---|---|---|---|
+| `prisma-postgresql` | PostgreSQL | Prisma v7 | yes |
+| `prisma-mysql` | MySQL | Prisma v7 | yes |
+| `prisma-sqlite` | SQLite | Prisma v7 | no |
+| `drizzle-postgresql` | PostgreSQL | Drizzle | yes |
+| `drizzle-mysql` | MySQL | Drizzle | yes |
+| `drizzle-sqlite` | SQLite | Drizzle | no |
 
-## Packaging
+## After scaffolding
 
-- `tsup` bundles `src/index.ts` (+ the inlined generator) into a single
-  `dist/index.js` (CJS, Node 20+) with a `#!/usr/bin/env node` shebang.
-- `templates/` is copied to `dist/templates` at build time, so the published
-  package is self-contained (the CLI reads templates from beside the bundle).
-- Only `dist/` is published (`files` field). Runtime deps: `@clack/prompts`,
-  `jiti`. No monorepo devDependencies are needed at runtime.
+```bash
+cd my-app
+cp .env.example .env          # single .env at project root
+# Generate a secret: openssl rand -base64 32
+# Paste into BETTER_AUTH_SECRET in .env
+
+pnpm install
+docker compose up -d           # skip for SQLite
+pnpm db:push                   # push schema to database
+pnpm dev                       # start API (4000) + Web (3000)
+```
+
+## Deployment
+
+The generated project includes everything needed to deploy **`apps/web` on
+Vercel** and **`apps/api` on any host** — platform-managed or your own VPS. The
+same-origin proxy works identically everywhere.
+
+### Frontend — Vercel
+
+- Root Directory = `apps/web`
+- `vercel.json` is included with Turborepo build command + `turbo-ignore`
+- Set `API_URL` to your backend URL in the Vercel dashboard
+
+### Backend — Railway / Fly.io / Render
+
+A multi-stage Dockerfile is included (`apps/api/Dockerfile`) with `turbo prune`
+for minimal image size. Platform configs are ready:
+
+| Host | Config file | Notes |
+|---|---|---|
+| **Railway** | `railway.json` | Auto-detected. Add Postgres via the dashboard. |
+| **Fly.io** | `fly.toml` | Run `fly launch`. Attach Postgres via `fly postgres create`. |
+| **Render** | `render.yaml` | Blueprint — provisions API + managed Postgres automatically. |
+
+### Backend — VPS (Docker Compose)
+
+Deploy anywhere with Docker Compose. Add this to your existing `docker-compose.yml`
+or create a `docker-compose.prod.yml`:
+
+```yaml
+# docker-compose.prod.yml
+services:
+  api:
+    build:
+      context: .
+      dockerfile: apps/api/Dockerfile
+    ports:
+      - "4000:4000"
+    environment:
+      DATABASE_URL: ${DATABASE_URL}
+      BETTER_AUTH_SECRET: ${BETTER_AUTH_SECRET}
+      WEB_URL: ${WEB_URL}
+      PORT: "4000"
+    restart: unless-stopped
+
+  # If you need a database on the VPS:
+  postgres:
+    image: postgres:16-alpine
+    environment:
+      POSTGRES_USER: app
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+      POSTGRES_DB: app
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    restart: unless-stopped
+
+volumes:
+  pgdata:
+```
+
+On the VPS:
+
+```bash
+# Clone your repo
+git clone https://github.com/you/project.git && cd project
+
+# Set environment variables
+cp .env.example .env
+# Edit .env with real values
+
+# Build and start
+docker compose -f docker-compose.prod.yml up -d --build
+```
+
+For production, add a reverse proxy (nginx, Caddy, or Traefik) in front of
+the API container to handle TLS termination. The health endpoint at
+`/api/health` can be used for uptime monitoring.
+
+### Production checklist
+
+See the generated `DEPLOYMENT.md` for the full 11-section guide covering:
+environment variables, OAuth callback URLs, circular dependency wiring
+(`WEB_URL` → `API_URL` → `WEB_URL`), preview deployments, and a
+post-deployment checklist.
+
+### VPS with Ansible (automated)
+
+For teams deploying to multiple VPS instances, an Ansible playbook skeleton:
+
+```yaml
+# deploy.yml
+- hosts: production
+  vars:
+    project_dir: /opt/my-app
+    repo_url: https://github.com/you/project.git
+  tasks:
+    - name: Clone repo
+      git:
+        repo: "{{ repo_url }}"
+        dest: "{{ project_dir }}"
+        version: main
+
+    - name: Set up .env
+      template:
+        src: .env.j2
+        dest: "{{ project_dir }}/.env"
+
+    - name: Build and start services
+      community.docker.docker_compose_v2:
+        project_src: "{{ project_dir }}"
+        files:
+          - docker-compose.prod.yml
+        build: always
+        state: present
+```
+
+For zero-downtime deploys, add a second container behind a load balancer and
+rotate via Docker Compose profiles or use `docker compose up -d --scale api=2`.
+
+## Local development
+
+```bash
+pnpm install
+cp .env.example .env
+# Set BETTER_AUTH_SECRET, OAuth keys, email config
+docker compose up -d   # only for PostgreSQL/MySQL
+pnpm db:push
+pnpm dev               # API on :4000, Web on :3000
+```
+
+The Next.js dev server proxies `/api/*` to the NestJS backend automatically.
+There is no CORS in your browser — the proxy makes everything same-origin.

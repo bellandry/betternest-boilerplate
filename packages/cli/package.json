@@ -1,7 +1,7 @@
 {
   "name": "create-betternest-app",
   "version": "0.6.2",
-  "description": "Scaffold a production-ready Next.js + NestJS + Better Auth monorepo with zero CORS, cookie, and trustedOrigins pain.",
+  "description": "Scaffold a production-ready Next.js + NestJS + Better Auth monorepo. Zero CORS, 6 DB combos (Prisma/Drizzle, PostgreSQL/MySQL/SQLite), deploy anywhere (Vercel + Railway/Fly.io/Render/VPS) with Docker.",
   "keywords": [
     "nextjs",
     "nestjs",
@@ -10,7 +10,18 @@
     "cli",
     "starter",
     "authentication",
-    "turborepo"
+    "turborepo",
+    "prisma",
+    "drizzle",
+    "postgresql",
+    "mysql",
+    "sqlite",
+    "docker",
+    "vercel",
+    "railway",
+    "fly",
+    "render",
+    "tailwindcss"
   ],
   "license": "MIT",
   "author": "Landry BELLA",
