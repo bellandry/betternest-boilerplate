@@ -2,13 +2,13 @@
 // shared betterAuth() instance reads process.env at module-evaluation time.
 import { config } from 'dotenv';
 import path from 'node:path';
-config({ path: path.resolve(__dirname, '..', '..', '.env') });
+config({ path: path.resolve(__dirname, '..', '..', '..', '.env') });
 
 // Resolve relative file: paths so SQLite always writes to the project root
 // regardless of which directory the process was started in.
 if (process.env.DATABASE_URL?.startsWith('file:./')) {
   const rel = process.env.DATABASE_URL.slice('file:'.length);
-  process.env.DATABASE_URL = `file:${path.resolve(__dirname, '..', '..', rel)}`;
+  process.env.DATABASE_URL = `file:${path.resolve(__dirname, '..', '..', '..', rel)}`;
 }
 
 import { NestFactory } from '@nestjs/core';

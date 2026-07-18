@@ -5,7 +5,7 @@ import path from 'node:path';
 
 let dbUrl = process.env.DATABASE_URL ?? 'data.db';
 if (!dbUrl.includes('://')) {
-  dbUrl = path.resolve(__dirname, '..', '..', dbUrl);
+  dbUrl = path.resolve(__dirname, '..', '..', '..', dbUrl);
 }
 
 const sqlite = new Database(dbUrl);
