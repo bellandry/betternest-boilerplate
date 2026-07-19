@@ -83,9 +83,12 @@ same-origin proxy works identically everywhere.
 
 ### Frontend — Vercel
 
-- Root Directory = `apps/web`
-- `vercel.json` is included with Turborepo build command + `turbo-ignore`
-- Set `API_URL` to your backend URL in the Vercel dashboard
+1. Push your project to GitHub.
+2. Dashboard: **Add New → Project → Import** your repo.
+3. Set **Root Directory** = `apps/web`. Framework auto-detected.
+4. `vercel.json` sets the correct build command automatically.
+5. Add env var: `API_URL` = your backend URL (e.g. `https://api.railway.app`).
+6. Deploy → copy the production Vercel URL → set `WEB_URL` on your backend → redeploy.
 
 ### Backend — Railway / Fly.io / Render
 
@@ -168,7 +171,7 @@ For teams deploying to multiple VPS instances, an Ansible playbook skeleton:
 - hosts: production
   vars:
     project_dir: /opt/my-app
-    repo_url: https://github.com/you/project.git
+    repo_url: git@github.com:<your-username>/<your-repo>.git  # ← your project repo, not the boilerplate
   tasks:
     - name: Clone repo
       git:

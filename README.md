@@ -70,9 +70,18 @@ everywhere. One `Dockerfile` covers all three managed platforms.
 
 ### Frontend → Vercel
 
-Set Root Directory to `apps/web` in the Vercel dashboard. `vercel.json` is
-already included with the correct Turborepo build command and `turbo-ignore`
-for preview deployments.
+1. Push your project to GitHub.
+2. In the Vercel dashboard: **Add New → Project → Import** your repo.
+3. Configure:
+   - **Root Directory**: `apps/web`
+   - Framework: auto-detected (Next.js)
+   - `vercel.json` handles the build command automatically
+4. Add environment variable:
+   - `API_URL` = your backend URL (e.g. `https://api.railway.app`)
+5. Click **Deploy**. Vercel builds the Next.js app.
+6. After deploy: copy the production URL (e.g. `https://my-app.vercel.app`)
+   → go back to your backend dashboard and set `WEB_URL` to this value
+   → redeploy the backend.
 
 ### Backend → Railway / Fly.io / Render
 
@@ -118,6 +127,37 @@ volumes:
 For zero-downtime deploys, add a reverse proxy (nginx, Caddy, Traefik) for
 TLS termination and scale behind a load balancer. See the generated
 `DEPLOYMENT.md` for the full 11-section production guide.
+
+### VPS with Ansible (automated)
+
+For teams deploying to multiple VPS instances:
+
+```yaml
+# deploy.yml
+- hosts: production
+  vars:
+    project_dir: /opt/my-app
+    repo_url: git@github.com:<your-username>/<your-repo>.git  # ← your project repo, not the boilerplate
+  tasks:
+    - name: Clone repo
+      git:
+        repo: "{{ repo_url }}"
+        dest: "{{ project_dir }}"
+        version: main
+
+    - name: Set up .env
+      template:
+        src: .env.j2
+        dest: "{{ project_dir }}/.env"
+
+    - name: Build and start services
+      community.docker.docker_compose_v2:
+        project_src: "{{ project_dir }}"
+        files:
+          - docker-compose.prod.yml
+        build: always
+        state: present
+```
 
 ## What's included
 
