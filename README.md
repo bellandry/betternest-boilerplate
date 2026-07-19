@@ -24,8 +24,10 @@ a completely different host.
 Choose your stack from the CLI and start building in 30 seconds:
 
 ```bash
-npx create-betternest-app my-app
-# or pick your database and go non-interactive
+npm i -g create-betternest-app    # install once, reuse forever
+create-betternest-app my-app
+
+# or zero-install with npx:
 npx create-betternest-app my-app --db=prisma-sqlite --yes
 ```
 
@@ -139,7 +141,7 @@ Every scaffolded project comes with:
 ## Quick start
 
 ```bash
-npx create-betternest-app my-app
+npx create-betternest-app my-app  # or: npm i -g create-betternest-app && create-betternest-app my-app
 cd my-app
 cp .env.example .env             # set BETTER_AUTH_SECRET in .env
 pnpm install
