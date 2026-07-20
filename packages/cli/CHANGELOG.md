@@ -1,5 +1,11 @@
 # create-betternest-app
 
+## 0.6.5
+
+### Patch Changes
+
+- 3d7e6e3: Fix Tailwind v4 shadcn styles not being applied. Consolidated the full theme (@theme, CSS variables, @layer base) into apps/web/app/globals.css alongside the @import 'tailwindcss' + @source directive. Removed duplicate @repo/ui/globals.css import from layout.tsx that was causing a double @theme resolution conflict in the monorepo setup.
+
 ## 0.6.4
 
 ### Patch Changes
