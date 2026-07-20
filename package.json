@@ -19,7 +19,7 @@
     "release": "pnpm --filter create-betternest-app build && changeset publish"
   },
   "devDependencies": {
-    "@changesets/cli": "^2.31.0",
+    "@changesets/cli": "^2.31.1",
     "@types/node": "^26.1.1",
     "prettier": "^3.3.3",
     "tsx": "^4.23.1",
