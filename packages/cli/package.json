@@ -1,6 +1,6 @@
 {
   "name": "create-betternest-app",
-  "version": "0.6.3",
+  "version": "0.6.4",
   "description": "Scaffold a production-ready Next.js + NestJS + Better Auth monorepo. Zero CORS, 6 DB combos (Prisma/Drizzle, PostgreSQL/MySQL/SQLite), deploy anywhere (Vercel + Railway/Fly.io/Render/VPS) with Docker.",
   "keywords": [
     "nextjs",
