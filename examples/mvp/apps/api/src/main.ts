@@ -47,9 +47,21 @@ async function bootstrap() {
     return json()(req as any, res as any, next);
   });
 
-  const port = Number(process.env.PORT ?? 4000);
-  await app.listen(port);
-  console.log(`[api] listening on http://localhost:${port}`);
+  const basePort = Number(process.env.PORT ?? 4000);
+  let port = basePort;
+  while (port < basePort + 100) {
+    try {
+      await app.listen(port);
+      console.log(`[api] listening on http://localhost:${port}`);
+      break;
+    } catch (err) {
+      if ((err as NodeJS.ErrnoException).code === 'EADDRINUSE') {
+        port++;
+      } else {
+        throw err;
+      }
+    }
+  }
 }
 
 void bootstrap();
