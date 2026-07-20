@@ -1,5 +1,11 @@
 # create-betternest-app
 
+## 0.6.6
+
+### Patch Changes
+
+- 79e6502: Fix Tailwind v4: move @source directive before @import 'tailwindcss' so the scanner detects shadcn classes in packages/ui. Add auto port fallback: API catches EADDRINUSE and tries next port, web uses scripts/dev.mjs to find first free port starting from 3000.
+
 ## 0.6.5
 
 ### Patch Changes
