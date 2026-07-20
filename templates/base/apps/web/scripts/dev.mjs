@@ -1,5 +1,6 @@
 import { spawn } from 'node:child_process';
 import net from 'node:net';
+import { createRequire } from 'node:module';
 
 function isAvailable(port) {
   return new Promise((resolve) => {
@@ -29,7 +30,10 @@ if (port !== basePort) {
   console.log(`[web] port ${basePort} in use → using ${port}`);
 }
 
-const child = spawn('pnpm', ['exec', 'next', 'dev', '-p', String(port), ...args], {
+const require = createRequire(import.meta.url);
+const nextBin = require.resolve('next/dist/bin/next');
+
+const child = spawn(process.execPath, [nextBin, 'dev', '-p', String(port), ...args], {
   stdio: 'inherit',
   env: { ...process.env, PORT: String(port) },
 });
