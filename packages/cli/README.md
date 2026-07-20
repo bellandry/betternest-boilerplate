@@ -18,6 +18,7 @@ npx create-betternest-app my-app
 - **Zero CORS** — same-origin proxy via Next.js rewrites, no cross-site cookies
 - **Trusted origins** dynamic — Vercel preview deployments work out of the box
 - **Health endpoints** — `/api/health` (no DB) and `/api/health/db` (ping)
+- **Rate limiting** — built-in on auth endpoints (sign-in, sign-up, password reset). Per-endpoint buckets, configurable via `RATE_LIMIT_MAX` / `RATE_LIMIT_WINDOW`, hot-reload (no restart), optional Redis for multi-instance
 - **Monorepo** — Turborepo, pnpm workspaces, shared packages (`@repo/ui`, `@repo/auth`, `@repo/db`, `@repo/email`)
 
 ## Usage

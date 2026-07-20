@@ -224,6 +224,34 @@ origin** (`WEB_URL`), not the API port.
 
 ---
 
+## Rate limiting
+
+Authentication endpoints are rate-limited out of the box to prevent brute force
+attacks. Each endpoint has its own independent bucket:
+
+| Endpoint | Path | Default limit |
+|---|---|---|
+| Sign-in | `POST /api/auth/sign-in/email` | 5 / 15 min |
+| Sign-up | `POST /api/auth/sign-up/email` | 5 / 15 min |
+| Forgot password | `POST /api/auth/forget-password` | 5 / 15 min |
+| Reset password | `POST /api/auth/reset-password` | 5 / 15 min |
+
+Configure via environment variables in `.env`:
+
+```env
+RATE_LIMIT_MAX=5          # attempts per window per endpoint
+RATE_LIMIT_WINDOW=900     # window in seconds
+```
+
+Limits are read on every request (hot reload, no restart). If you exceed the
+limit, the API returns `429 Too Many Requests` with a `Retry-After` header.
+
+For multi-instance deployments, set `REDIS_URL` and install the optional packages
+(`@nest-lab/throttler-storage-redis` + `ioredis`) to share rate limit counters
+across instances. Without Redis, counters are in-memory (lost on restart).
+
+---
+
 ## Data model
 
 Prisma models User, Session, Account, Verification match the Better Auth

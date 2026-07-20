@@ -24,6 +24,10 @@ async function bootstrap() {
     bodyParser: false,
   });
 
+  // Trust the reverse proxy so req.ip reads X-Forwarded-For — required by
+  // the rate limiter to count real client IPs on Railway, Render, Fly, Vercel.
+  app.set('trust proxy', 1);
+
   const webUrl = process.env.WEB_URL ?? 'http://localhost:3000';
 
   // ── CORS is a FALLBACK only (mobile apps, Postman, direct API clients).

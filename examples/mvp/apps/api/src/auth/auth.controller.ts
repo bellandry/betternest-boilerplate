@@ -1,21 +1,39 @@
-import { All, Controller, Req, Res } from '@nestjs/common';
+import { All, Controller, Post, Req, Res } from '@nestjs/common';
 import type { Request, Response } from 'express';
 import { toNodeHandler } from 'better-auth/node';
 import { auth } from '@repo/auth';
 
-// Catch-all controller. EVERY /api/auth/* request (sign-in, sign-up, OAuth
-// callbacks, get-session, sign-out, ...) is delegated to Better Auth's native
-// node handler. The Next.js proxy forwards the browser's same-origin requests
-// here, so the browser never sees this port directly.
+// Four rate-limited endpoints + a catch-all for everything else
+// (get-session, sign-out, OAuth callbacks, ...). Each endpoint delegates
+// to Better Auth's native node handler, which does internal routing based
+// on the request URL.
 @Controller('api/auth')
 export class AuthController {
   private readonly handler = toNodeHandler(auth);
 
-  // '*path' = Express 5 named wildcard (Nest 11). Matches any sub-path.
+  @Post('sign-in/email')
+  async signInEmail(@Req() req: Request, @Res() res: Response) {
+    await this.handler(req, res);
+  }
+
+  @Post('sign-up/email')
+  async signUpEmail(@Req() req: Request, @Res() res: Response) {
+    await this.handler(req, res);
+  }
+
+  @Post('forget-password')
+  async forgetPassword(@Req() req: Request, @Res() res: Response) {
+    await this.handler(req, res);
+  }
+
+  @Post('reset-password')
+  async resetPassword(@Req() req: Request, @Res() res: Response) {
+    await this.handler(req, res);
+  }
+
+  // Catch-all — skipped by the rate limiter (see app.module.ts skipIf).
   @All('*path')
   async handle(@Req() req: Request, @Res() res: Response) {
-    // Body parser is disabled for this route (see main.ts) — the handler
-    // reads the raw request stream itself.
     await this.handler(req, res);
   }
 }

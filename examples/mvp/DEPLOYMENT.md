@@ -387,7 +387,75 @@ starter — it is a constraint of how OAuth providers validate callback URLs.
 
 ---
 
-## 11. Post-Deployment Checklist
+## 11. Rate Limiting & Redis (Optional)
+
+Authentication endpoints (`/api/auth/sign-in/email`, `/api/auth/sign-up/email`,
+`/api/auth/forget-password`, `/api/auth/reset-password`) are rate-limited by
+default: **5 attempts per IP per 15-minute sliding window** per endpoint.
+Configure via env vars:
+
+```
+RATE_LIMIT_MAX=5         # attempts per window per endpoint
+RATE_LIMIT_WINDOW=900    # window in seconds (900 = 15 min)
+```
+
+### In-Memory (Default)
+
+Rate limit counters are stored in-memory in the Node.js process. This works
+for every deployment target (Railway, Fly.io, Render, Docker) and requires
+**zero additional dependencies**. Counters are lost on process restart — this
+is acceptable for single-instance deployments.
+
+### Redis (Multi-Instance)
+
+For horizontally scaled deployments where multiple API instances need to share
+rate limit counters, enable Redis:
+
+1. **Install the optional packages:**
+
+```bash
+pnpm add @nest-lab/throttler-storage-redis ioredis --filter api
+```
+
+2. **Set the Redis URL:**
+
+```env
+REDIS_URL=redis://localhost:6379
+```
+
+The application auto-detects `REDIS_URL` at startup and switches from
+in-memory to Redis storage. If the variable is set but the packages are
+missing, the app logs a warning and falls back to in-memory.
+
+> **Platform-managed Redis:** Railway, Fly.io, and Render all offer managed
+> Redis services. Attach one to your API service and set `REDIS_URL` to the
+> injected connection string.
+
+### Hot Reload
+
+The rate limiter reads `RATE_LIMIT_MAX` and `RATE_LIMIT_WINDOW` from
+`process.env` on **every request**. You can adjust limits at runtime —
+no restart needed. Useful for temporarily tightening limits during an
+attack or raising them for a launch event.
+
+### Testing
+
+To verify rate limiting is active:
+
+```bash
+# 6 rapid requests should return 200 (1st) ... 200 (5th), then 429.
+for i in $(seq 1 6); do
+  curl -s -o /dev/null -w "%{http_code}" -X POST \
+    http://localhost:4000/api/auth/sign-in/email \
+    -H "Content-Type: application/json" \
+    -d '{"email":"test@example.com","password":"wrong"}'
+  echo
+done
+```
+
+---
+
+## 12. Post-Deployment Checklist
 
 Verify every item before shipping to users:
 

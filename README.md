@@ -56,10 +56,16 @@ everywhere. One `Dockerfile` covers all three managed platforms.
 | SQLite | Prisma v7 | no |
 | SQLite | Drizzle | no |
 
+### Built-in rate limiting
+
+Auth endpoints (sign-in, sign-up, password reset) are rate-limited with
+independent per-endpoint buckets (5 attempts per 15 min window). Limits are
+read on every request (hot reload). Optional Redis for multi-instance deploys.
+
 ### Monorepo that ships ready
 
 - **`apps/web`** — Next.js 16, Tailwind CSS v4, shadcn/ui components
-- **`apps/api`** — NestJS 11, Express 5, health endpoints
+- **`apps/api`** — NestJS 11, Express 5, health endpoints, built-in rate limiting
 - **`packages/auth`** — Better Auth (email/password, Google, GitHub OAuth)
 - **`packages/db`** — Prisma or Drizzle with schema migrations
 - **`packages/email`** — Resend or SMTP driver
