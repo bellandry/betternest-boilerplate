@@ -26,6 +26,25 @@ auth traffic is proxied same-origin through Next.js rewrites.
 
 ---
 
+## Support level for this generated project
+
+The selected database is **{{DB_LABEL}}**. BetterNest keeps one opinionated production path and documents alternatives with explicit boundaries.
+
+| Path | Support level | Intended use |
+| --- | --- | --- |
+| Prisma + PostgreSQL | **Golden path** | Recommended for new production projects and the primary deployment journey |
+| Prisma + SQLite | Supported | Fast local development without Docker or an external database |
+| Prisma + MySQL | Supported | Production projects standardized on MySQL |
+| Drizzle + PostgreSQL | Supported | Projects that prefer Drizzle with PostgreSQL |
+| Drizzle + MySQL | Supported | Projects that prefer Drizzle with MySQL |
+| Drizzle + SQLite | Supported | Lightweight local projects without Docker |
+
+The golden path receives the deepest documentation and regression coverage. Supported alternatives are covered for their stated use case, but they are not automatically equivalent for deployment topology, operational scale, or upgrade guidance. Before production deployment, review `DEPLOYMENT.md`, run `GET /api/health` and `GET /api/health/db`, and confirm the migration strategy for this database.
+
+See the [BetterNest support policy](https://github.com/bellandry/betternest-boilerplate/blob/main/docs/adr/README.md) for the definitions of Golden path, Supported, Experimental, and Deprecated.
+
+---
+
 ## Repository structure
 
 ```
@@ -162,6 +181,19 @@ pnpm dev
 
 - Web: http://localhost:3000
 - API: http://localhost:4000
+
+### Verify the first successful run
+
+Keep `pnpm dev` running and use a second terminal:
+
+```bash
+curl -fsS http://localhost:3000/api/health
+curl -fsS http://localhost:3000/api/health/db
+```
+
+The first command should return `{"status":"ok"}`. The second should return `{"status":"ok","db":"connected"}` after the schema has been pushed. These checks confirm that the browser-visible origin, the same-origin proxy, the API, and the selected database are working together.
+
+If the database check fails, inspect `DATABASE_URL`, verify that PostgreSQL or MySQL is running when required, and rerun `pnpm db:push`.
 
 ---
 

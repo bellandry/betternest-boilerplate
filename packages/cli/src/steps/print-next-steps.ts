@@ -27,6 +27,10 @@ export function printNextSteps(input: NextStepsInput): void {
   else lines.push('# SQLite selected: Docker is not required');
   lines.push(runCommand(pm, 'db:push'));
   lines.push(runCommand(pm, 'dev'));
+  lines.push('');
+  lines.push('# in another terminal, verify the generated project:');
+  lines.push('curl -fsS http://localhost:3000/api/health');
+  lines.push('curl -fsS http://localhost:3000/api/health/db');
 
   note(lines.join('\n'), 'Next steps');
 
@@ -38,5 +42,7 @@ export function printNextSteps(input: NextStepsInput): void {
     );
   }
 
-  outro('Done. Happy building — auth, cross-app, without the CORS pain.');
+  outro(
+    'Generated. Your first success signal is a 200 response from /api/health and /api/health/db. Happy building — auth, cross-app, without the CORS pain.',
+  );
 }

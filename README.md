@@ -16,6 +16,7 @@
 - [Quick start](#quick-start)
 - [CLI usage](#cli-usage)
 - [Database matrix](#database-matrix)
+- [Support levels and recommended paths](#support-levels-and-recommended-paths)
 - [Generated project structure](#generated-project-structure)
 - [Architecture](#architecture)
 - [Environment configuration](#environment-configuration)
@@ -87,7 +88,14 @@ pnpm db:push
 pnpm dev
 ```
 
-The frontend is available at [http://localhost:3000](http://localhost:3000), and the API listens on port `4000` by default. Next.js proxies `/api/*` requests so browser code does not need to target the API port directly.
+Keep `pnpm dev` running and use a second terminal to verify the complete path:
+
+```bash
+curl -fsS http://localhost:3000/api/health
+curl -fsS http://localhost:3000/api/health/db
+```
+
+The first command should return `{"status":"ok"}` and the second `{"status":"ok","db":"connected"}`. The frontend is available at [http://localhost:3000](http://localhost:3000), and the API listens on port `4000` by default. Next.js proxies `/api/*` requests so browser code does not need to target the API port directly.
 
 Before using the project with real users, replace every example value, configure the providers you selected, and read the [deployment guide](./templates/base/DEPLOYMENT.md).
 
@@ -161,6 +169,21 @@ The generator provides six combinations:
 | `drizzle-postgresql` | Drizzle | PostgreSQL | Yes          |
 | `drizzle-mysql`      | Drizzle | MySQL      | Yes          |
 | `drizzle-sqlite`     | Drizzle | SQLite     | No           |
+
+### Support levels and recommended paths
+
+Availability does not mean that every combination carries the same product promise. The table below is the public support contract for the current release.
+
+| CLI identifier       | Support level   | Intended use                                               | Evidence and boundary                                                                                                  |
+| -------------------- | --------------- | ---------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------- |
+| `prisma-postgresql`  | **Golden path** | New production projects and the primary deployment journey | End-to-end documentation, generated reference, CI matrix, migration contract, and deployment recipes                   |
+| `prisma-sqlite`      | **Supported**   | Fast local development without external infrastructure     | Generation, install, build, lint, and smoke coverage; not the recommended multi-instance production database           |
+| `prisma-mysql`       | **Supported**   | Teams that standardize on MySQL                            | Generation, install, build, lint, migration, and smoke coverage; deployment topology remains the team’s responsibility |
+| `drizzle-postgresql` | **Supported**   | Teams that prefer Drizzle with PostgreSQL                  | Generation, install, build, lint, migration, and smoke coverage; not the primary onboarding path                       |
+| `drizzle-mysql`      | **Supported**   | Teams that prefer Drizzle with MySQL                       | Generation, install, build, lint, migration, and smoke coverage; not the primary onboarding path                       |
+| `drizzle-sqlite`     | **Supported**   | Lightweight local projects without Docker                  | Generation, install, build, lint, and smoke coverage; use the documented SQLite constraints before production adoption |
+
+Support levels are explicit rather than implied. **Golden path** means the strongest recommended journey; **Supported** means the stated use case is covered by the repository contract, while alternatives may have less deployment guidance and regression depth. New combinations must earn their support level through tests, documentation, and a clear migration story. See the [support-level ADRs](./docs/adr/README.md) and the [generated-project definition of done](./docs/generated-project-definition-of-done.md).
 
 ```bash
 # Prisma + SQLite, with no external infrastructure

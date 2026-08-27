@@ -58,7 +58,7 @@ Checklist — create these files and wire them in `manifest.ts`:
      (the generator wraps all oauth entries in one `socialProviders: {}`).
 3. **`client-ui.fragment.tsx`** — a self-contained React component module. It is
    copied to `clientUiTargetPath`; the page renders it via the slot JSX.
-4. **`env.fragment.txt`** *(oauth)* — the `.env.example` lines, with a
+4. **`env.fragment.txt`** _(oauth)_ — the `.env.example` lines, with a
    `# --- ... ---` section header.
 5. **`readme-setup.fragment.md`** — setup instructions injected into the README.
 
@@ -199,5 +199,3 @@ Maintainers cut a release by applying the accumulated changesets and publishing:
 pnpm version-packages   # changeset version — bumps versions + writes CHANGELOG
 pnpm release            # builds the CLI, then changeset publish
 ```
-
-
