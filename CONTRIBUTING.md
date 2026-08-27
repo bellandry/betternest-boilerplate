@@ -28,6 +28,14 @@ Assembly rules the generator relies on:
   `OAUTH_BUTTONS` (auth pages); `DATABASE_ENV`, `AUTH_PROVIDER_ENV` (api env);
   `AUTH_SETUP_STEPS` (README).
 
+## Product planning and architectural decisions
+
+Product work is organized in [the product roadmap](docs/product-roadmap.md) using the **Now / Next / Later** horizons. Keep the active Now scope small and outcome-oriented; do not turn every possible idea into an implementation commitment.
+
+Use a GitHub **initiative** as a tracker for a product outcome that spans multiple deliverables. Use a GitHub **issue** for one actionable result that can be implemented, reviewed, and validated independently. Every product issue should explain the problem, outcome, scope, acceptance criteria, dependencies, validation method, and relevant links. Apply one `status:*`, one `priority:*`, and one `area:*` label, then assign the matching milestone.
+
+Use an [Architecture Decision Record](docs/adr/README.md) when a choice changes the generated-project contract, support promise, portability, or long-term product direction. An ADR records the decision and its revisit criteria; it is not a substitute for the delivery issues that implement it.
+
 ## Add a new auth provider
 
 Adding a provider requires **only a new folder** under
