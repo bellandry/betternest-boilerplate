@@ -10,11 +10,11 @@ BetterNest is an open-source launchpad for TypeScript web products. Its purpose 
 
 Issues should be written as observable outcomes rather than implementation activities. Each issue must state the problem, the expected outcome, its scope, acceptance criteria, dependencies, and validation method.
 
-| Priority | Meaning |
-| --- | --- |
-| P0 | Required to make the current product promise credible |
-| P1 | Important product capability after the foundation is reliable |
-| P2 | Strategic or exploratory work that should not distract from the current path |
+| Priority | Meaning                                                                      |
+| -------- | ---------------------------------------------------------------------------- |
+| P0       | Required to make the current product promise credible                        |
+| P1       | Important product capability after the foundation is reliable                |
+| P2       | Strategic or exploratory work that should not distract from the current path |
 
 The repository uses GitHub labels for `priority:*`, `status:*`, and `area:*`. Milestones represent the three roadmap horizons.
 
@@ -46,6 +46,8 @@ Candidate P1 themes:
 - background jobs with retry and idempotency guarantees;
 - billing primitives with webhook safety.
 
+The first discovery deliverable for this horizon is [Organizations, Invitations, Roles, and Permissions](./product-discovery/0001-organizations-invitations-and-rbac.md). It recommends deferring implementation until repeated demand, a portable design, and the required security evidence are confirmed.
+
 ## LATER — Project Evolution and Ecosystem
 
 The long-term opportunity is to help projects after their initial generation. This includes diagnostics, compatibility checks, upgrade previews, migration guidance, private presets, and a maintained module registry.
@@ -56,16 +58,16 @@ These are P2 until the generated project experience is proven. BetterNest should
 
 The most useful metrics measure user success, not feature count:
 
-| Metric | Product question |
-| --- | --- |
-| Generation success rate | Does the CLI produce a usable project without repair work? |
-| Time to first local run | How quickly does a new user see the application? |
-| Time to first deployment | How quickly does a project reach a public URL? |
-| Authentication activation | Does the user create and use the first account? |
-| Day-7 retention | Is the generated project still being developed after one week? |
-| Upgrade success rate | Can existing projects evolve without regressions? |
-| Generated-project defects | How many issues appear after generation? |
-| Support burden | Which onboarding steps create confusion? |
+| Metric                    | Product question                                               |
+| ------------------------- | -------------------------------------------------------------- |
+| Generation success rate   | Does the CLI produce a usable project without repair work?     |
+| Time to first local run   | How quickly does a new user see the application?               |
+| Time to first deployment  | How quickly does a project reach a public URL?                 |
+| Authentication activation | Does the user create and use the first account?                |
+| Day-7 retention           | Is the generated project still being developed after one week? |
+| Upgrade success rate      | Can existing projects evolve without regressions?              |
+| Generated-project defects | How many issues appear after generation?                       |
+| Support burden            | Which onboarding steps create confusion?                       |
 
 ## Working agreement
 
