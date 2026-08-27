@@ -25,12 +25,11 @@ RUN pnpm install --frozen-lockfile
 COPY --from=pruner /app/out/full/ .
 ENV DATABASE_URL=file:./placeholder.db
 RUN pnpm turbo run build --filter=api
-RUN pnpm --filter @repo/db exec prisma generate
 
 # ── Runner ────────────────────────────────────────────────────────────
 # Non-root user, minimal surface area. The entrypoint runs migrations
 # first, then starts the compiled server.
-FROM node:20-alpine AS runner
+FROM base AS runner
 RUN addgroup --system --gid 1001 app && adduser --system --uid 1001 app
 USER app
 WORKDIR /app

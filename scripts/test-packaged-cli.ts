@@ -123,11 +123,11 @@ function main(): void {
   // the comparison is about template fidelity, not formatting.
   try {
     execSync(
-      `npx prettier --write "${generatedDir.split(path.sep).join('/')}/**/*.{ts,tsx,json,md}" --log-level warn`,
+      `pnpm exec prettier --write "${generatedDir.split(path.sep).join('/')}/**/*.{ts,tsx,json,md}" --log-level warn`,
       { cwd: repoRoot, stdio: 'inherit' },
     );
-  } catch {
-    // best-effort; comparison below is authoritative
+  } catch (error) {
+    throw new Error('Could not format generated output before comparison.', { cause: error });
   }
 
   const generated = walk(generatedDir);

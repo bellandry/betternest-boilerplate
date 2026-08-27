@@ -4,7 +4,7 @@ Sign-up, sign-in, **email verification**, and **password reset** are all enabled
 Emails are sent through the `@repo/email` package — the only place an email
 provider SDK is used, so you can swap providers without touching auth.
 
-Pick a provider with `EMAIL_PROVIDER` and set `EMAIL_FROM` in `apps/api/.env`:
+Pick a provider with `EMAIL_PROVIDER` and set `EMAIL_FROM` in the root `.env`:
 
 **Resend** (`EMAIL_PROVIDER=resend`, the default)
 

@@ -2,6 +2,7 @@
 // shared betterAuth() instance reads process.env at module-evaluation time.
 import { config } from 'dotenv';
 import path from 'node:path';
+import { randomUUID } from 'node:crypto';
 config({ path: path.resolve(__dirname, '..', '..', '..', '.env') });
 
 // Resolve relative file: paths so SQLite always writes to the project root
@@ -14,27 +15,53 @@ if (process.env.DATABASE_URL?.startsWith('file:./')) {
 import { NestFactory } from '@nestjs/core';
 import { type NestExpressApplication } from '@nestjs/platform-express';
 import { json } from 'express';
+import type { NextFunction, Request, Response } from 'express';
 import { AppModule } from './app.module';
+import { validateEnvironment } from './config';
 
 async function bootstrap() {
+  validateEnvironment();
   // ── The #1 trap: NestJS's global body parser consumes the request stream.
   // Better Auth's node handler needs the RAW body, so we disable Nest's
   // parser globally and re-add JSON parsing for every route EXCEPT /api/auth.
   const app = await NestFactory.create<NestExpressApplication>(AppModule, {
     bodyParser: false,
   });
+  app.enableShutdownHooks();
+  app.disable('x-powered-by');
+  app.use((req: Request, res: Response, next: NextFunction) => {
+    const requestId = req.header('x-request-id')?.slice(0, 128) || randomUUID();
+    res.setHeader('X-Request-ID', requestId);
+    res.setHeader('X-Content-Type-Options', 'nosniff');
+    res.setHeader('X-Frame-Options', 'DENY');
+    res.setHeader('Referrer-Policy', 'strict-origin-when-cross-origin');
+    res.setHeader('Permissions-Policy', 'camera=(), microphone=(), geolocation=()');
+    next();
+  });
 
   // Trust the reverse proxy so req.ip reads X-Forwarded-For — required by
   // the rate limiter to count real client IPs on Railway, Render, Fly, Vercel.
-  app.set('trust proxy', 1);
+  const trustedProxyHops = Number(process.env.TRUSTED_PROXY_HOPS ?? '1');
+  if (!Number.isInteger(trustedProxyHops) || trustedProxyHops < 0) {
+    throw new Error('TRUSTED_PROXY_HOPS must be a non-negative integer.');
+  }
+  app.set('trust proxy', trustedProxyHops);
 
   const webUrl = process.env.WEB_URL ?? 'http://localhost:3000';
+  const additionalCorsOrigins = (process.env.CORS_ORIGINS ?? '')
+    .split(',')
+    .map((origin) => origin.trim())
+    .filter(Boolean);
+  const corsOrigins = [webUrl, ...additionalCorsOrigins];
+  if (corsOrigins.includes('*')) {
+    throw new Error('CORS_ORIGINS must not contain * when credentials are enabled.');
+  }
 
   // ── CORS is a FALLBACK only (mobile apps, Postman, direct API clients).
   // The browser auth flow never triggers CORS because it is same-origin via
   // the Next.js proxy. NEVER use origin '*' with credentials.
   app.enableCors({
-    origin: [webUrl],
+    origin: corsOrigins,
     credentials: true,
   });
 
@@ -44,7 +71,7 @@ async function bootstrap() {
       return next();
     }
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    return json()(req as any, res as any, next);
+    return json({ limit: process.env.JSON_BODY_LIMIT ?? '1mb' })(req as any, res as any, next);
   });
 
   const basePort = Number(process.env.PORT ?? 4000);
@@ -62,6 +89,12 @@ async function bootstrap() {
       }
     }
   }
+  if (port >= basePort + 100) {
+    throw new Error(`Could not find an available port between ${basePort} and ${basePort + 99}.`);
+  }
 }
 
-void bootstrap();
+void bootstrap().catch((err: unknown) => {
+  console.error('[api] bootstrap failed', err);
+  process.exitCode = 1;
+});

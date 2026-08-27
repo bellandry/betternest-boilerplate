@@ -10,5 +10,5 @@ origin** (`WEB_URL`), not the API port.
    http://localhost:3000/api/auth/callback/google
    ```
    In production use `https://your-domain.com/api/auth/callback/google`.
-4. Copy the client ID/secret into `apps/api/.env` (`GOOGLE_CLIENT_ID`,
+4. Copy the client ID/secret into the root `.env` (`GOOGLE_CLIENT_ID`,
    `GOOGLE_CLIENT_SECRET`).

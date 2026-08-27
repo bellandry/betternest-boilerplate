@@ -132,7 +132,7 @@ pnpm install
 ### 2. Configure environment
 
 ```bash
-cp .env.example .env          # root .env is the single source of truth
+cp .env.example .env          # shared API/DB configuration
 cp apps/web/.env.example apps/web/.env
 ```
 
@@ -142,18 +142,19 @@ Generate a secret for the API:
 openssl rand -base64 32       # paste into BETTER_AUTH_SECRET in .env
 ```
 
-Start the database (skip for SQLite):
+Start the database (PostgreSQL/MySQL only; skip for SQLite):
 
 ```bash
 docker compose up -d
+```
 
-### 4. Push the database schema
+### 3. Push the database schema
 
 ```bash
 pnpm db:push
 ```
 
-### 5. Run everything
+### 4. Run everything
 
 ```bash
 pnpm dev
@@ -216,6 +217,7 @@ across instances. Without Redis, counters are in-memory (lost on restart).
 | `pnpm build`     | Build all apps and packages           |
 | `pnpm db:push`   | Push {{DB_ORM}} schema to the database |
 | `pnpm db:studio` | Open {{DB_ORM}} Studio                |
+| `pnpm db:migrate:deploy` | Apply production migrations       |
 | `pnpm lint`      | Lint all packages                     |
 | `pnpm format`    | Prettier write                        |
 

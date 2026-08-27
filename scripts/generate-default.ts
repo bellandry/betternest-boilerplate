@@ -12,12 +12,13 @@ async function main() {
 
   // Deterministic formatting so the committed output has no spurious diffs.
   try {
-    execSync(`npx prettier --write "examples/mvp/**/*.{ts,tsx,json,md}" --log-level warn`, {
+    execSync(`pnpm exec prettier --write "examples/mvp/**/*.{ts,tsx,json,md}" --log-level warn`, {
       cwd: repoRoot,
       stdio: 'inherit',
     });
-  } catch {
-    // Prettier is best-effort; never fail generation on formatting.
+  } catch (error) {
+    console.error('Reference formatting failed. Refusing to publish an unformatted fixture.');
+    throw error;
   }
 
   console.log(`\nGenerated '${DEFAULT_SELECTION.projectName}' -> ${out}`);

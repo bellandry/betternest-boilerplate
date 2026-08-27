@@ -30,6 +30,9 @@ npx create-betternest-app my-app
 # Scripted — pick a database and auth providers
 npx create-betternest-app my-app --db=prisma-sqlite --yes
 
+# Preview a selection without creating files
+npx create-betternest-app my-app --db=prisma-sqlite --dry-run --yes
+
 # All flags
 npx create-betternest-app my-app \
   --db=prisma-postgresql \
@@ -45,10 +48,11 @@ npx create-betternest-app my-app \
 | `[project-name]` | valid npm/folder name | prompted | Positional |
 | `--db` | `prisma-postgresql`, `prisma-mysql`, `prisma-sqlite`, `drizzle-postgresql`, `drizzle-mysql`, `drizzle-sqlite` | prompted (default: SQLite) | ORM-engine combo |
 | `--auth` | `email-password,google,github` (CSV) | all three | Auth providers |
-| `--pm` | `pnpm`, `npm`, `yarn`, `bun` | `pnpm` | Package manager |
+| `--pm` | `pnpm` | `pnpm` | Package manager of the generated workspace |
 | `--no-install` | — | runs install | Skip dependency install |
 | `--no-git` | — | runs `git init` | Skip git init |
 | `-y`, `--yes` | — | interactive | Skip prompts |
+| `--dry-run` | — | false | Print the resolved plan without writing files |
 | `-h`, `--help` | — | — | Show help |
 
 ## Database combos
@@ -66,12 +70,14 @@ npx create-betternest-app my-app \
 
 ```bash
 cd my-app
-cp .env.example .env          # single .env at project root
+cp .env.example .env          # shared API/DB configuration
+cp apps/web/.env.example apps/web/.env  # Next.js-only configuration
 # Generate a secret: openssl rand -base64 32
 # Paste into BETTER_AUTH_SECRET in .env
 
 pnpm install
-docker compose up -d           # skip for SQLite
+# Run this only for PostgreSQL/MySQL:
+docker compose up -d
 pnpm db:push                   # push schema to database
 pnpm dev                       # start API (4000) + Web (3000)
 ```
@@ -79,8 +85,10 @@ pnpm dev                       # start API (4000) + Web (3000)
 ## Deployment
 
 The generated project includes everything needed to deploy **`apps/web` on
-Vercel** and **`apps/api` on any host** — platform-managed or your own VPS. The
-same-origin proxy works identically everywhere.
+Vercel** and **`apps/api` on a PostgreSQL/MySQL host** — platform-managed or your
+own VPS. The same-origin proxy works identically everywhere. The generated
+workspace officially supports pnpm; `npx`, `yarn dlx` and `bunx` may be used to
+run the CLI itself, but not to install the generated monorepo.
 
 ### Frontend — Vercel
 

@@ -1,41 +1,27 @@
-import { select } from '@clack/prompts';
 import type { PackageManager } from '../flags';
-import { unwrap } from './util';
 
-export const PACKAGE_MANAGERS: PackageManager[] = ['pnpm', 'npm', 'yarn', 'bun'];
+// The generated project is a pnpm workspace (`pnpm-workspace.yaml`). Other
+// package managers can still run the CLI itself via npx/yarn dlx/bunx, but they
+// are not supported for installing or running the generated monorepo.
+export const PACKAGE_MANAGERS: PackageManager[] = ['pnpm'];
 
 export function isPackageManager(value: string): value is PackageManager {
-  return (PACKAGE_MANAGERS as string[]).includes(value);
+  return value === 'pnpm';
 }
 
-// Detect the pm that launched the CLI (via npm_config_user_agent), e.g. when
-// run through `pnpm dlx` / `npx` / `yarn dlx` / `bunx`.
 export function detectPackageManager(): PackageManager | undefined {
   const ua = process.env.npm_config_user_agent ?? '';
-  const name = ua.split('/')[0];
-  return isPackageManager(name) ? name : undefined;
+  return ua.startsWith('pnpm/') ? 'pnpm' : undefined;
 }
 
-export async function promptPackageManager(initial?: PackageManager): Promise<PackageManager> {
-  const preferred = initial ?? detectPackageManager() ?? 'pnpm';
-  const value = await select({
-    message: 'Package manager?',
-    initialValue: preferred,
-    options: [
-      { value: 'pnpm', label: 'pnpm', hint: 'recommended' },
-      { value: 'npm', label: 'npm' },
-      { value: 'yarn', label: 'yarn' },
-      { value: 'bun', label: 'bun' },
-    ],
-  });
-  return unwrap(value) as PackageManager;
+export function promptPackageManager(initial?: PackageManager): PackageManager {
+  return initial ?? 'pnpm';
 }
 
-export function installCommand(pm: PackageManager): string {
-  return pm === 'yarn' ? 'yarn' : `${pm} install`;
+export function installCommand(_pm: PackageManager): string {
+  return 'pnpm install';
 }
 
-// The command to run a package.json script (npm needs `run`).
-export function runCommand(pm: PackageManager, script: string): string {
-  return pm === 'npm' ? `npm run ${script}` : `${pm} ${script}`;
+export function runCommand(_pm: PackageManager, script: string): string {
+  return `pnpm ${script}`;
 }

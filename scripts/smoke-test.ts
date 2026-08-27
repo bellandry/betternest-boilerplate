@@ -8,6 +8,13 @@ import { DEFAULT_SELECTION } from '../packages/generator/DEFAULT_SELECTION';
 // CI guard: generate the default selection into a THROWAWAY temp dir, then
 // install + build + lint. Never touches the committed examples/mvp.
 async function main() {
+  // Prisma 7 evaluates prisma.config.ts during `db:generate`. A compilation
+  // smoke test must provide a syntactically valid URL, without requiring a
+  // running database.
+  process.env.DATABASE_URL ??= 'postgresql://postgres:postgres@localhost:5432/smoke?schema=public';
+  process.env.BETTER_AUTH_SECRET ??= 'ci-smoke-not-a-real-secret-0123456789abcdef';
+  process.env.WEB_URL ??= 'http://localhost:3000';
+
   const tmpRoot = fs.mkdtempSync(path.join(os.tmpdir(), 'betternest-smoke-'));
   const out = path.join(tmpRoot, DEFAULT_SELECTION.projectName);
   console.log(`Smoke test dir: ${out}`);

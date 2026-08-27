@@ -42,7 +42,7 @@ export async function sendEmail({
     throw new Error(
       'EMAIL_FROM is not set — a verified sender address is required. ' +
         'For Resend: a verified domain (e.g. noreply@yourdomain.com). ' +
-        'For SMTP/Gmail: your Gmail address. See apps/api/.env.example.',
+        'For SMTP/Gmail: your Gmail address. See the root .env.example.',
     );
   }
 

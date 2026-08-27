@@ -1,11 +1,13 @@
 {
   "$schema": "https://turbo.build/schema.json",
-  "globalDependencies": [".env"],
+  "globalDependencies": [".env", "apps/web/.env"],
   "globalEnv": [
     "NODE_ENV",
     "DATABASE_URL",
     "BETTER_AUTH_SECRET",
     "WEB_URL",
+    "CORS_ORIGINS",
+    "BETTER_AUTH_TRUSTED_ORIGINS",
     "API_URL",
     "NEXT_PUBLIC_APP_URL",
     "GOOGLE_CLIENT_ID",
@@ -20,7 +22,9 @@
     "SMTP_USER",
     "SMTP_PASSWORD",
     "SMTP_SECURE",
-    "PORT"
+    "PORT",
+    "TRUSTED_PROXY_HOPS",
+    "JSON_BODY_LIMIT"
   ],
   "tasks": {
     "build": {

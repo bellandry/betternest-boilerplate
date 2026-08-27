@@ -4,6 +4,8 @@ dist
 .next
 out
 build
+*.tsbuildinfo
+**/next-env.d.ts
 
 # env
 .env

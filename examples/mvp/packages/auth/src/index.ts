@@ -4,6 +4,10 @@ import { prisma } from '@repo/db';
 import { sendEmail } from '@repo/email';
 
 const isProd = process.env.NODE_ENV === 'production';
+const configuredTrustedOrigins = (process.env.BETTER_AUTH_TRUSTED_ORIGINS ?? '')
+  .split(',')
+  .map((origin) => origin.trim())
+  .filter(Boolean);
 
 // ── The single source of truth for auth in the whole monorepo ──
 // Imported ONLY by the NestJS API (server-only). The Next.js front never
@@ -64,6 +68,7 @@ export const auth = betterAuth({
   trustedOrigins: [
     process.env.WEB_URL ?? 'http://localhost:3000',
     ...(process.env.VERCEL_URL ? [`https://${process.env.VERCEL_URL}`] : []),
+    ...configuredTrustedOrigins,
   ],
 
   user: {

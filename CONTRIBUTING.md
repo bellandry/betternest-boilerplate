@@ -13,7 +13,7 @@ templates/
   db/<id>/              # a database choice (manifest + fragments + files/)
   auth-providers/<id>/  # an auth method (manifest + fragments)
 packages/generator/     # the assembly engine (no CLI, pure logic)
-scripts/                # generate-default, smoke-test
+scripts/                # generate-default, test-generator, smoke-test
 examples/mvp/           # committed generated reference (do not edit by hand)
 ```
 
@@ -78,10 +78,11 @@ After changing any template, regenerate `examples/mvp/`:
 pnpm generate:default      # wipes + rebuilds examples/mvp, then formats it
 ```
 
-Then verify a clean generation still installs, builds and lints in a throwaway
+Then verify the generator contract and a clean generation still installs, builds and lints in a throwaway
 dir (never touches `examples/mvp`):
 
 ```bash
+pnpm test:unit
 pnpm smoke-test
 ```
 
@@ -90,9 +91,11 @@ committed reference never drifts from the templates.
 
 ## Test the CLI locally (before publishing)
 
-The CLI (`packages/cli`) wraps the generator behind prompts/flags. It ships as a
-`tsup` bundle with `templates/` copied into `dist/templates`, so it must be
-built before running.
+The CLI (`packages/cli`) wraps the generator behind prompts/flags. The generated
+workspace officially supports pnpm because it is a pnpm workspace; `npx`, `yarn
+dlx` and `bunx` can execute the CLI itself but are not package managers for the
+output. It ships as a `tsup` bundle with `templates/` copied into
+`dist/templates`, so it must be built before running.
 
 ```bash
 # Build + run in one step (fastest iteration):

@@ -1,0 +1,12 @@
+{
+  "schemaVersion": 1,
+  "generatedBy": "create-betternest-app",
+  "packageManager": "pnpm",
+  "database": {
+    "id": "prisma-postgresql",
+    "label": "Prisma + PostgreSQL",
+    "orm": "Prisma",
+    "engine": "PostgreSQL"
+  },
+  "authProviders": ["email-password", "google", "github"]
+}

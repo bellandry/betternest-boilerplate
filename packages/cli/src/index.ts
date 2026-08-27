@@ -32,6 +32,11 @@ async function run(flags: RawFlags): Promise<void> {
     'Summary',
   );
 
+  if (flags.dryRun) {
+    log.info('Dry run complete. No files were written and no commands were executed.');
+    return;
+  }
+
   await runGenerator(plan.selection, targetDir, TEMPLATES_DIR);
   initGit(targetDir, plan.doGit);
   const { installed } = installDependencies(targetDir, plan.pm, plan.doInstall);
@@ -41,6 +46,7 @@ async function run(flags: RawFlags): Promise<void> {
     projectName: plan.selection.projectName,
     relativeDir: plan.selection.projectName,
     pm: plan.pm,
+    db: plan.selection.db,
     installed,
     hasOAuth,
   });

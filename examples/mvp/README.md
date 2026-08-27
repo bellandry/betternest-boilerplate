@@ -132,7 +132,7 @@ pnpm install
 ### 2. Configure environment
 
 ```bash
-cp .env.example .env          # root .env is the single source of truth
+cp .env.example .env          # shared API/DB configuration
 cp apps/web/.env.example apps/web/.env
 ```
 
@@ -142,18 +142,19 @@ Generate a secret for the API:
 openssl rand -base64 32       # paste into BETTER_AUTH_SECRET in .env
 ```
 
-Start the database (skip for SQLite):
+Start the database (PostgreSQL/MySQL only; skip for SQLite):
 
-````bash
+```bash
 docker compose up -d
+```
 
-### 4. Push the database schema
+### 3. Push the database schema
 
 ```bash
 pnpm db:push
-````
+```
 
-### 5. Run everything
+### 4. Run everything
 
 ```bash
 pnpm dev
@@ -176,7 +177,7 @@ Sign-up, sign-in, **email verification**, and **password reset** are all enabled
 Emails are sent through the `@repo/email` package — the only place an email
 provider SDK is used, so you can swap providers without touching auth.
 
-Pick a provider with `EMAIL_PROVIDER` and set `EMAIL_FROM` in `apps/api/.env`:
+Pick a provider with `EMAIL_PROVIDER` and set `EMAIL_FROM` in the root `.env`:
 
 **Resend** (`EMAIL_PROVIDER=resend`, the default)
 
@@ -209,7 +210,7 @@ origin** (`WEB_URL`), not the API port.
    http://localhost:3000/api/auth/callback/google
    ```
    In production use `https://your-domain.com/api/auth/callback/google`.
-4. Copy the client ID/secret into `apps/api/.env` (`GOOGLE_CLIENT_ID`,
+4. Copy the client ID/secret into the root `.env` (`GOOGLE_CLIENT_ID`,
    `GOOGLE_CLIENT_SECRET`).
 
 ### GitHub
@@ -219,7 +220,7 @@ origin** (`WEB_URL`), not the API port.
    ```
    http://localhost:3000/api/auth/callback/github
    ```
-3. Copy the client ID/secret into `apps/api/.env` (`GITHUB_CLIENT_ID`,
+3. Copy the client ID/secret into the root `.env` (`GITHUB_CLIENT_ID`,
    `GITHUB_CLIENT_SECRET`).
 
 ---
@@ -229,12 +230,12 @@ origin** (`WEB_URL`), not the API port.
 Authentication endpoints are rate-limited out of the box to prevent brute force
 attacks. Each endpoint has its own independent bucket:
 
-| Endpoint | Path | Default limit |
-|---|---|---|
-| Sign-in | `POST /api/auth/sign-in/email` | 5 / 15 min |
-| Sign-up | `POST /api/auth/sign-up/email` | 5 / 15 min |
-| Forgot password | `POST /api/auth/forget-password` | 5 / 15 min |
-| Reset password | `POST /api/auth/reset-password` | 5 / 15 min |
+| Endpoint        | Path                             | Default limit |
+| --------------- | -------------------------------- | ------------- |
+| Sign-in         | `POST /api/auth/sign-in/email`   | 5 / 15 min    |
+| Sign-up         | `POST /api/auth/sign-up/email`   | 5 / 15 min    |
+| Forgot password | `POST /api/auth/forget-password` | 5 / 15 min    |
+| Reset password  | `POST /api/auth/reset-password`  | 5 / 15 min    |
 
 Configure via environment variables in `.env`:
 
@@ -265,14 +266,15 @@ groundwork for later.
 
 ## Scripts
 
-| Command          | Description                           |
-| ---------------- | ------------------------------------- |
-| `pnpm dev`       | Run web + api in parallel (Turborepo) |
-| `pnpm build`     | Build all apps and packages           |
-| `pnpm db:push`   | Push Prisma schema to the database    |
-| `pnpm db:studio` | Open Prisma Studio                    |
-| `pnpm lint`      | Lint all packages                     |
-| `pnpm format`    | Prettier write                        |
+| Command                  | Description                           |
+| ------------------------ | ------------------------------------- |
+| `pnpm dev`               | Run web + api in parallel (Turborepo) |
+| `pnpm build`             | Build all apps and packages           |
+| `pnpm db:push`           | Push Prisma schema to the database    |
+| `pnpm db:studio`         | Open Prisma Studio                    |
+| `pnpm db:migrate:deploy` | Apply production migrations           |
+| `pnpm lint`              | Lint all packages                     |
+| `pnpm format`            | Prettier write                        |
 
 ---
 

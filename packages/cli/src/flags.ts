@@ -1,6 +1,6 @@
 import { CliError } from './errors';
 
-export type PackageManager = 'pnpm' | 'npm' | 'yarn' | 'bun';
+export type PackageManager = 'pnpm';
 
 // Raw, syntactically-parsed flags. Semantic validation (does this db exist?)
 // happens later against the generator catalog.
@@ -12,6 +12,7 @@ export interface RawFlags {
   install?: boolean; // undefined = ask; false via --no-install
   git?: boolean; // undefined = ask; false via --no-git
   yes: boolean;
+  dryRun: boolean;
   verbose: boolean;
   help: boolean;
 }
@@ -20,13 +21,17 @@ const VALUE_FLAGS = new Set(['db', 'auth', 'pm']);
 
 // Supports `--key=value`, `--key value`, `--flag`, `--no-flag`, `-y`, `-v`, `-h`.
 export function parseFlags(argv: string[]): RawFlags {
-  const flags: RawFlags = { yes: false, verbose: false, help: false };
+  const flags: RawFlags = { yes: false, dryRun: false, verbose: false, help: false };
 
   for (let i = 0; i < argv.length; i++) {
     const arg = argv[i];
 
     if (arg === '-y' || arg === '--yes') {
       flags.yes = true;
+      continue;
+    }
+    if (arg === '--dry-run') {
+      flags.dryRun = true;
       continue;
     }
     if (arg === '-v' || arg === '--verbose') {
@@ -116,10 +121,11 @@ Usage:
 Options:
   --db=<id>            Database template id (e.g. prisma-postgresql)
   --auth=<a,b,c>       Comma-separated auth provider ids (e.g. email-password,google,github)
-  --pm=<manager>       Package manager: pnpm | npm | yarn | bun
+  --pm=<manager>        Package manager: pnpm (the generated workspace uses pnpm)
   --no-install         Skip installing dependencies
   --no-git             Skip git init + first commit
   -y, --yes            Use defaults / provided flags, skip all prompts
+  --dry-run            Print the resolved plan without writing files
   -v, --verbose        Print full stack traces on error
   -h, --help           Show this help
 

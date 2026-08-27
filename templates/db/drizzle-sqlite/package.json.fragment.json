@@ -2,9 +2,7 @@
   "scripts": {
     "db:generate": "turbo run db:generate",
     "db:push": "pnpm --filter @repo/db db:push",
-    "db:studio": "pnpm --filter @repo/db db:studio"
-  },
-  "pnpm": {
-    "onlyBuiltDependencies": ["better-sqlite3"]
+    "db:studio": "pnpm --filter @repo/db db:studio",
+    "db:migrate:deploy": "pnpm --filter @repo/db db:migrate:deploy"
   }
 }

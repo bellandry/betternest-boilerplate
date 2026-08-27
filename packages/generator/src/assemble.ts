@@ -14,6 +14,7 @@ const COMPOSED = new Set<string>([
   'package.json',
   'README.md',
   '.env.example',
+  '.betternest.json',
   'packages/auth/package.json',
   'packages/auth/src/index.ts',
   'apps/web/app/(auth)/sign-in/page.tsx',
@@ -91,6 +92,29 @@ export async function generateProject(
   tokens.DB_ORM = db.manifest.label.split(/[\s+]/).filter(Boolean)[0] ?? db.manifest.label;
   tokens.DB_DIALECT = db.manifest.database;
 
+  // A small machine-readable contract for future upgrades and diagnostics.
+  // It records choices, but never secrets or environment values.
+  write(
+    outDir,
+    '.betternest.json',
+    JSON.stringify(
+      {
+        schemaVersion: 1,
+        generatedBy: 'create-betternest-app',
+        packageManager: 'pnpm',
+        database: {
+          id: selection.db,
+          label: db.manifest.label,
+          orm: db.manifest.ormName,
+          engine: db.manifest.database,
+        },
+        authProviders: selection.authProviders,
+      },
+      null,
+      2,
+    ) + '\n',
+  );
+
   // ── 1. Base tree (skips composed files) ──
   copyBaseFiles(baseDir, outDir, tokens, COMPOSED);
 
@@ -151,7 +175,14 @@ export async function generateProject(
   }
 
   // ── 5. sign-in / sign-up pages ──
-  const uiImports = providers.map((p) => p.manifest.clientUiImport).join('\n');
+  const uiImportsFor = (page: 'signIn' | 'signUp') =>
+    providers
+      .map((p) =>
+        page === 'signIn'
+          ? (p.manifest.clientUiImportSignIn ?? p.manifest.clientUiImport)
+          : (p.manifest.clientUiImportSignUp ?? p.manifest.clientUiImport),
+      )
+      .join('\n');
   const oauthButtons = oauth.length
     ? `${OAUTH_WRAPPER_OPEN}\n${oauth.map((p) => p.manifest.oauthButtonSlot ?? '').join('\n')}\n${OAUTH_WRAPPER_CLOSE}`
     : '';
@@ -163,7 +194,7 @@ export async function generateProject(
     outDir,
     'apps/web/app/(auth)/sign-in/page.tsx',
     injectMarkers(readBase(baseDir, 'apps/web/app/(auth)/sign-in/page.tsx.hbs', tokens), {
-      AUTH_UI_IMPORTS: uiImports,
+      AUTH_UI_IMPORTS: uiImportsFor('signIn'),
       SIGN_IN_FORM: signInForm,
       AUTH_DIVIDER: dividerFor(signInForm),
       OAUTH_BUTTONS: oauthButtons,
@@ -173,7 +204,7 @@ export async function generateProject(
     outDir,
     'apps/web/app/(auth)/sign-up/page.tsx',
     injectMarkers(readBase(baseDir, 'apps/web/app/(auth)/sign-up/page.tsx.hbs', tokens), {
-      AUTH_UI_IMPORTS: uiImports,
+      AUTH_UI_IMPORTS: uiImportsFor('signUp'),
       SIGN_UP_FORM: signUpForm,
       AUTH_DIVIDER: dividerFor(signUpForm),
       OAUTH_BUTTONS: oauthButtons,

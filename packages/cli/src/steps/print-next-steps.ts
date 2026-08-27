@@ -6,22 +6,25 @@ export interface NextStepsInput {
   projectName: string;
   relativeDir: string; // what to `cd` into
   pm: PackageManager;
+  db: string;
   installed: boolean;
   hasOAuth: boolean;
 }
 
 export function printNextSteps(input: NextStepsInput): void {
-  const { relativeDir, pm, installed, hasOAuth } = input;
+  const { relativeDir, pm, db, installed, hasOAuth } = input;
+  const needsDocker = !db.endsWith('-sqlite');
 
   const lines: string[] = [`cd ${relativeDir}`];
   if (!installed) lines.push(installCommand(pm));
 
-  // Env setup (root .env feeds docker-compose; per-app .env for the runtime).
+  // Shared runtime settings live in root .env; Next.js-only settings live in
+  // apps/web/.env because Next resolves env files relative to the app root.
   lines.push('cp .env.example .env');
-  lines.push('cp apps/api/.env.example apps/api/.env');
   lines.push('cp apps/web/.env.example apps/web/.env');
-  lines.push('# set BETTER_AUTH_SECRET in apps/api/.env (openssl rand -base64 32)');
-  lines.push('docker compose up -d');
+  lines.push('# set BETTER_AUTH_SECRET in .env (openssl rand -base64 32)');
+  if (needsDocker) lines.push('docker compose up -d');
+  else lines.push('# SQLite selected: Docker is not required');
   lines.push(runCommand(pm, 'db:push'));
   lines.push(runCommand(pm, 'dev'));
 

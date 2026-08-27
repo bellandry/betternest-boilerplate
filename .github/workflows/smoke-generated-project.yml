@@ -14,20 +14,28 @@ jobs:
         include:
           - db: prisma-postgresql
             docker: true
+            service: postgres
             db-url: postgresql://postgres:postgres@localhost:5432/my_app?schema=public
-            label: prisma-postgresql
           - db: drizzle-postgresql
             docker: true
-            db-url: postgresql://postgres:postgres@localhost:5432/my_app?schema=public
-            label: drizzle-postgresql
+            service: postgres
+            db-url: postgresql://postgres:postgres@localhost:5432/my_app
+          - db: prisma-mysql
+            docker: true
+            service: mysql
+            db-url: mysql://root:mysql@localhost:3306/my_app
+          - db: drizzle-mysql
+            docker: true
+            service: mysql
+            db-url: mysql://root:mysql@localhost:3306/my_app
           - db: prisma-sqlite
             docker: false
+            service: none
             db-url: file:./data.db
-            label: prisma-sqlite
           - db: drizzle-sqlite
             docker: false
+            service: none
             db-url: data.db
-            label: drizzle-sqlite
     env:
       DATABASE_URL: ${{ matrix.db-url }}
       BETTER_AUTH_SECRET: ci-smoke-not-a-real-secret-0123456789abcdef
@@ -60,21 +68,32 @@ jobs:
         working-directory: ${{ runner.temp }}/my-app
         run: pnpm install
 
-      - name: Start Docker
+      - name: Start database container
         if: ${{ matrix.docker }}
         working-directory: ${{ runner.temp }}/my-app
-        run: docker compose up -d postgres
+        run: docker compose up -d ${{ matrix.service }}
 
-      - name: Wait for Postgres
-        if: ${{ matrix.docker }}
+      - name: Wait for PostgreSQL
+        if: ${{ matrix.docker && matrix.service == 'postgres' }}
         run: |
           for i in $(seq 1 30); do
             if docker exec my-app-postgres pg_isready -U postgres >/dev/null 2>&1; then
-              echo "Postgres ready"; exit 0
+              echo "PostgreSQL ready"; exit 0
             fi
-            echo "waiting for postgres ($i)..."; sleep 2
+            echo "waiting for PostgreSQL ($i)..."; sleep 2
           done
-          echo "Postgres did not become ready"; exit 1
+          echo "PostgreSQL did not become ready"; exit 1
+
+      - name: Wait for MySQL
+        if: ${{ matrix.docker && matrix.service == 'mysql' }}
+        run: |
+          for i in $(seq 1 45); do
+            if docker exec my-app-mysql mysqladmin ping -h localhost -u root -pmysql >/dev/null 2>&1; then
+              echo "MySQL ready"; exit 0
+            fi
+            echo "waiting for MySQL ($i)..."; sleep 2
+          done
+          echo "MySQL did not become ready"; exit 1
 
       - name: Push database schema
         working-directory: ${{ runner.temp }}/my-app

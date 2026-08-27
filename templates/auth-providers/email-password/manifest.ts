@@ -13,6 +13,10 @@ const manifest: ProviderManifest = {
   clientUiTargetPath: 'apps/web/components/auth/email-password-form.tsx',
   clientUiImport:
     "import { EmailPasswordSignInForm, EmailPasswordSignUpForm } from '@/components/auth/email-password-form';",
+  clientUiImportSignIn:
+    "import { EmailPasswordSignInForm } from '@/components/auth/email-password-form';",
+  clientUiImportSignUp:
+    "import { EmailPasswordSignUpForm } from '@/components/auth/email-password-form';",
   signInSlot: '<EmailPasswordSignInForm />',
   signUpSlot: '<EmailPasswordSignUpForm />',
   envFragmentPath: 'env.fragment.txt',

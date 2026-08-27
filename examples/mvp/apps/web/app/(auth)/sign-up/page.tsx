@@ -1,10 +1,7 @@
 'use client';
 
 import Link from 'next/link';
-import {
-  EmailPasswordSignInForm,
-  EmailPasswordSignUpForm,
-} from '@/components/auth/email-password-form';
+import { EmailPasswordSignUpForm } from '@/components/auth/email-password-form';
 import { GoogleButton } from '@/components/auth/google-button';
 import { GithubButton } from '@/components/auth/github-button';
 import {

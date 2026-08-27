@@ -26,7 +26,9 @@ export interface ProviderManifest {
   // Self-contained React component module copied into the generated web app.
   clientUiFragmentPath: string;
   clientUiTargetPath: string; // where it lands under apps/web/components/auth/
-  clientUiImport: string; // import line added to the auth pages
+  clientUiImport: string; // fallback import line added to both auth pages
+  clientUiImportSignIn?: string;
+  clientUiImportSignUp?: string;
 
   // JSX injected into the page markers (only the relevant ones per kind).
   signInSlot?: string; // credential -> the sign-in form element

@@ -69,7 +69,7 @@ to `myapp.vercel.app` — a first-party, same-site cookie.
 | Variable | How to get it | Notes |
 |----------|--------------|-------|
 | `WEB_URL` | Copy from Vercel after frontend deploy | `https://myapp.vercel.app` — see section 8 |
-| `DATABASE_URL` | Auto-injected by the platform | Railway / Fly.io / Render inject this when you attach a Postgres service |
+| `DATABASE_URL` | Auto-injected or managed by the platform | Use the URL for the selected PostgreSQL/MySQL/SQLite adapter |
 | `BETTER_AUTH_SECRET` | Generate locally: `openssl rand -base64 32` | Never reuse your dev secret. Losing this key invalidates all sessions. |
 | `GOOGLE_CLIENT_ID` | Google Cloud Console → APIs & Services → Credentials | Create a separate "production" OAuth client |
 | `GOOGLE_CLIENT_SECRET` | Same as above | |
@@ -80,14 +80,26 @@ to `myapp.vercel.app` — a first-party, same-site cookie.
 | `RESEND_API_KEY` | https://resend.com/api-keys | Only needed if `EMAIL_PROVIDER=resend` |
 | `SMTP_HOST` `SMTP_PORT` `SMTP_USER` `SMTP_PASSWORD` | Your SMTP provider | Only needed if `EMAIL_PROVIDER=smtp` |
 | `PORT` | `4000` (or let the platform set it) | Most platforms override this automatically |
+| `TRUSTED_PROXY_HOPS` | `1` behind one reverse proxy | Set to the actual trusted proxy hop count |
+| `JSON_BODY_LIMIT` | `1mb` | Maximum JSON payload for non-auth routes |
+| `CORS_ORIGINS` | Empty by default | Comma-separated explicit origins for direct API clients; never use `*` with credentials |
 
 ### Frontend (set on Vercel dashboard)
 
 | Variable | How to get it | Notes |
 |----------|--------------|-------|
 | `API_URL` | Copy from backend after deploy | `https://api.railway.app` — see section 7 |
+| `NEXT_PUBLIC_APP_URL` | The public frontend URL | Used for absolute URLs during server rendering |
 
 ---
+
+## Database migrations
+
+Use `pnpm db:push` only for local development or disposable environments. The
+production Docker entrypoint calls `pnpm db:migrate:deploy`, which delegates to
+`prisma migrate deploy` or `drizzle-kit migrate` according to the selected DB
+adapter. Keep migration files under version control and run the deployment
+against a backup or staging database before production.
 
 ## 4. Backend on Railway
 
@@ -447,3 +459,6 @@ Verify every item before shipping to users:
 - [ ] Opening the browser console on any page shows **zero CORS errors**
 - [ ] `GET https://<backend-url>/api/health` returns `{"status":"ok"}` (HTTP 200)
 - [ ] `GET https://<backend-url>/api/health/db` returns `{"status":"ok","db":"connected"}` (HTTP 200)
+- [ ] `TRUSTED_PROXY_HOPS` matches the actual reverse-proxy topology
+- [ ] `CORS_ORIGINS` contains only explicit trusted origins (never `*` with credentials)
+- [ ] `pnpm db:migrate:deploy` succeeds from the production image before API startup

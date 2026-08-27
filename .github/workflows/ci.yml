@@ -35,24 +35,35 @@ jobs:
       - name: Build
         run: pnpm build
 
-      - name: Generator unit tests (skipped cleanly if none)
-        run: pnpm --filter=@repo/generator run test --if-present
+      - name: Generator unit tests
+        run: pnpm test:unit
 
       - name: Packaged CLI smoke test (real .tgz)
         run: pnpm test:pack
 
-  # test:pack diffs against examples/mvp (prisma-postgresql). These jobs give
-  # the other major combos the same build/lint coverage on every PR without a
-  # database (the full boot is covered by the Smoke workflow on main).
-  non-postgresql-build:
+  # Build and lint every database variant without requiring a live database.
+  # Runtime boot and migration coverage is handled by the Smoke workflow on main.
+  db-build:
     name: ${{ matrix.db }} · generate · build · lint (no DB)
     runs-on: ubuntu-latest
     strategy:
       fail-fast: false
       matrix:
-        db: [drizzle-postgresql, drizzle-sqlite, prisma-sqlite]
+        include:
+          - db: prisma-postgresql
+            db-url: postgresql://postgres:postgres@localhost:5432/my_app?schema=public
+          - db: drizzle-postgresql
+            db-url: postgresql://postgres:postgres@localhost:5432/my_app
+          - db: prisma-mysql
+            db-url: mysql://root:mysql@localhost:3306/my_app
+          - db: drizzle-mysql
+            db-url: mysql://root:mysql@localhost:3306/my_app
+          - db: prisma-sqlite
+            db-url: file:./data.db
+          - db: drizzle-sqlite
+            db-url: data.db
     env:
-      DATABASE_URL: file:./data.db
+      DATABASE_URL: ${{ matrix.db-url }}
     steps:
       - name: Checkout
         uses: actions/checkout@v7
