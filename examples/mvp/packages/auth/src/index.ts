@@ -32,8 +32,8 @@ export const auth = betterAuth({
       console.log('[auth] sendResetPassword triggered for', user.email);
       await sendEmail({
         to: user.email,
-        subject: 'Réinitialise ton mot de passe',
-        html: `<a href="${url}">Cliquer ici pour réinitialiser ton mot de passe</a>`,
+        subject: 'Reset your password',
+        html: `<a href="${url}">Click here to reset your password</a>`,
       });
     },
   },
@@ -43,8 +43,8 @@ export const auth = betterAuth({
       console.log('[auth] sendVerificationEmail triggered for', user.email);
       await sendEmail({
         to: user.email,
-        subject: 'Vérifie ton adresse email',
-        html: `<a href="${url}">Cliquer ici pour vérifier ton email</a>`,
+        subject: 'Verify your email address',
+        html: `<a href="${url}">Click here to verify your email</a>`,
       });
     },
     sendOnSignUp: true,

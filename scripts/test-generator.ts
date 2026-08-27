@@ -84,7 +84,10 @@ async function main(): Promise<void> {
       ) as { database?: { id?: string }; packageManager?: string };
       assert.equal(projectManifest.database?.id, db.id);
       assert.equal(projectManifest.packageManager, 'pnpm');
-      assert.ok(!fs.readFileSync(path.join(out, 'packages/auth/src/index.ts'), 'utf8').includes('DB_ADAPTER_'));
+      const authSource = fs.readFileSync(path.join(out, 'packages/auth/src/index.ts'), 'utf8');
+      assert.ok(!authSource.includes('DB_ADAPTER_'));
+      assert.match(authSource, /Reset your password/);
+      assert.match(authSource, /Verify your email address/);
       const signInPage = fs.readFileSync(path.join(out, 'apps/web/app/(auth)/sign-in/page.tsx'), 'utf8');
       const signUpPage = fs.readFileSync(path.join(out, 'apps/web/app/(auth)/sign-up/page.tsx'), 'utf8');
       assert.match(signInPage, /EmailPasswordSignInForm/);

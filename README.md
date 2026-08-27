@@ -1,82 +1,76 @@
 # BetterNest Boilerplate
 
 [![npm version](https://img.shields.io/npm/v/create-betternest-app?color=blue)](https://www.npmjs.com/package/create-betternest-app)
-[![License MIT](https://img.shields.io/badge/license-MIT-green)](./LICENSE)
+[![License MIT](https://img.shields.io/badge/license-MIT-green)](https://opensource.org/licenses/MIT)
 [![CI](https://github.com/bellandry/betternest-boilerplate/actions/workflows/ci.yml/badge.svg)](https://github.com/bellandry/betternest-boilerplate/actions/workflows/ci.yml)
 [![PRs welcome](https://img.shields.io/badge/PRs-welcome-brightgreen)](./CONTRIBUTING.md)
 
-**BetterNest Boilerplate** est un générateur de monorepo pour démarrer rapidement une application web full-stack avec **Next.js**, **NestJS**, **Better Auth**, **Turborepo** et une base de données au choix. Le CLI `create-betternest-app` assemble un projet cohérent à partir de templates composables, puis peut installer ses dépendances et initialiser Git automatiquement.
+**BetterNest Boilerplate** is a composable monorepo generator for full-stack web applications built with **Next.js**, **NestJS**, **Better Auth**, **Turborepo**, and your choice of database. The `create-betternest-app` CLI assembles a consistent project from reusable templates, optionally installs dependencies, and can initialize Git automatically.
 
-> Cette version fournit une base solide et réutilisable pour un produit réel. Elle ne remplace pas une revue de sécurité, une stratégie de sauvegarde ni une validation d’architecture adaptée à votre contexte métier.
+> This boilerplate is a production-oriented starting point. It does not replace a security review, a backup strategy, or architecture decisions specific to your product and compliance requirements.
 
-## Sommaire
+## Table of contents
 
-- [Objectifs et principes](#objectifs-et-principes)
-- [Prérequis](#prérequis)
-- [Démarrage en cinq minutes](#démarrage-en-cinq-minutes)
-- [Utiliser le CLI](#utiliser-le-cli)
-- [Choisir sa base de données](#choisir-sa-base-de-données)
-- [Structure d’un projet généré](#structure-dun-projet-généré)
-- [Architecture applicative](#architecture-applicative)
-- [Configuration de l’environnement](#configuration-de-lenvironnement)
-- [Développement local](#développement-local)
-- [Authentification](#authentification)
-- [Base de données et migrations](#base-de-données-et-migrations)
-- [API, proxy et santé](#api-proxy-et-santé)
-- [Sécurité et exploitation](#sécurité-et-exploitation)
-- [Déploiement](#déploiement)
-- [Tester le générateur](#tester-le-générateur)
-- [Étendre la boilerplate](#étendre-la-boilerplate)
-- [Versionner et publier le CLI](#versionner-et-publier-le-cli)
-- [Dépannage](#dépannage)
-- [Contribuer](#contribuer)
-- [Références](#références)
+- [Overview](#overview)
+- [Prerequisites](#prerequisites)
+- [Quick start](#quick-start)
+- [CLI usage](#cli-usage)
+- [Database matrix](#database-matrix)
+- [Generated project structure](#generated-project-structure)
+- [Architecture](#architecture)
+- [Environment configuration](#environment-configuration)
+- [Local development](#local-development)
+- [Authentication](#authentication)
+- [Database and migrations](#database-and-migrations)
+- [API and health checks](#api-and-health-checks)
+- [Security and operations](#security-and-operations)
+- [Deployment](#deployment)
+- [Testing the boilerplate](#testing-the-boilerplate)
+- [Extending the generator](#extending-the-generator)
+- [Versioning and releases](#versioning-and-releases)
+- [Troubleshooting](#troubleshooting)
+- [Contributing](#contributing)
+- [References](#references)
 
-## Objectifs et principes
+## Overview
 
-BetterNest vise à réduire le temps passé à assembler les briques communes d’une application SaaS ou métier, sans enfermer le projet dans une seule base de données ni dans un seul hébergeur.
+BetterNest reduces the time spent assembling the common foundations of a SaaS or business application without locking the generated project to one database engine or hosting provider.
 
-Le navigateur communique avec une **origine unique**, celle de l’application Next.js. Les appels `/api/*` sont réécrits côté serveur par Next.js vers l’API NestJS. Les cookies de session restent ainsi first-party sur le domaine visible par l’utilisateur, tandis que le backend peut être hébergé séparément sur Railway, Fly.io, Render, un VPS ou toute autre plateforme compatible Docker.
+The browser communicates with a **single public origin**, the Next.js application. Next.js rewrites `/api/*` requests server-side to the NestJS API. Session cookies therefore remain first-party on the domain visible to users, while the backend can run independently on Railway, Fly.io, Render, a VPS, or any Docker-compatible platform.
 
-Les décisions structurantes sont les suivantes :
+| Area           | Included choice                                                                 |
+| -------------- | ------------------------------------------------------------------------------- |
+| Frontend       | Next.js 16, App Router, Tailwind CSS v4, and shared UI components               |
+| Backend        | NestJS 11 with Express 5                                                        |
+| Authentication | Better Auth with email/password, Google, and GitHub providers                   |
+| Monorepo       | pnpm workspaces and Turborepo                                                   |
+| Database       | Prisma or Drizzle with PostgreSQL, MySQL, or SQLite                             |
+| Deployment     | Docker, Vercel, Railway, Fly.io, Render, or a VPS                               |
+| Safeguards     | Environment validation, auth rate limiting, security headers, and health checks |
 
-| Domaine             | Choix fourni                                                                       |
-| ------------------- | ---------------------------------------------------------------------------------- |
-| Frontend            | Next.js 16, App Router, Tailwind CSS v4 et composants UI partagés                  |
-| Backend             | NestJS 11 avec Express 5                                                           |
-| Authentification    | Better Auth, email/mot de passe, Google et GitHub                                  |
-| Monorepo            | pnpm workspaces et Turborepo                                                       |
-| Base de données     | Prisma ou Drizzle avec PostgreSQL, MySQL ou SQLite                                 |
-| Déploiement         | Docker, Vercel, Railway, Fly.io, Render ou VPS                                     |
-| Protection intégrée | Validation d’environnement, rate limiting auth, headers de sécurité, health checks |
+The repository root contains the **template system and generator**. It is not intended to run as a business application. Use the CLI to create an application project.
 
-Le dépôt courant est le **système de templates et le générateur**. Il n’est pas destiné à être lancé comme une application métier depuis sa racine. Pour créer une application, utilisez le CLI.
+## Prerequisites
 
-## Prérequis
+| Tool    | Expected version                        | Purpose                                              |
+| ------- | --------------------------------------- | ---------------------------------------------------- |
+| Node.js | `>=20.9.0`                              | Run the CLI, Next.js, and NestJS                     |
+| pnpm    | `10.x`; generated projects use `10.6.3` | Install dependencies and manage the workspace        |
+| Git     | Recent version                          | Version-control generated projects                   |
+| Docker  | Recent version, optional                | Run PostgreSQL/MySQL locally and build the API image |
 
-Pour utiliser le CLI et développer la boilerplate, installez les outils suivants :
-
-| Outil   | Version attendue                 | Rôle                                                                                   |
-| ------- | -------------------------------- | -------------------------------------------------------------------------------------- |
-| Node.js | `>=20.9.0`                       | Exécuter le CLI, Next.js et NestJS                                                     |
-| pnpm    | `10.x`, version générée `10.6.3` | Installer les dépendances et gérer le workspace                                        |
-| Git     | Version récente                  | Versionner le projet généré                                                            |
-| Docker  | Récent, optionnel                | Nécessaire uniquement pour PostgreSQL ou MySQL en local et pour construire l’image API |
-
-Le monorepo généré supporte officiellement **pnpm**. Le CLI lui-même peut être lancé avec `npx`, mais le projet produit contient des scripts et un workspace pnpm : installez donc pnpm avant de travailler dans le projet généré.
-
-Vérifiez votre environnement :
+The generated monorepo officially supports **pnpm**. The CLI itself can be launched with `npx`, but the generated workspace contains pnpm-specific scripts and metadata. Install pnpm before working inside a generated project.
 
 ```bash
 node --version
 pnpm --version
 git --version
-docker --version       # optionnel
+docker --version       # optional
 ```
 
-## Démarrage en cinq minutes
+## Quick start
 
-La commande la plus simple utilise Prisma avec SQLite. Elle ne nécessite ni Docker ni serveur de base de données externe.
+The shortest path uses Prisma with SQLite. It requires neither Docker nor an external database server.
 
 ```bash
 npx create-betternest-app my-app --db=prisma-sqlite --yes
@@ -85,7 +79,7 @@ cd my-app
 cp .env.example .env
 cp apps/web/.env.example apps/web/.env
 
-# Générez un secret de session et placez-le dans .env.
+# Generate a secret and put the result in .env.
 openssl rand -base64 32
 
 pnpm install
@@ -93,36 +87,21 @@ pnpm db:push
 pnpm dev
 ```
 
-L’application est alors disponible sur [http://localhost:3000](http://localhost:3000) et l’API écoute par défaut sur le port `4000`. Le proxy Next.js permet aux pages du frontend d’appeler `/api/*` sans cibler directement le port de l’API.
+The frontend is available at [http://localhost:3000](http://localhost:3000), and the API listens on port `4000` by default. Next.js proxies `/api/*` requests so browser code does not need to target the API port directly.
 
-Avant toute utilisation réelle, remplacez les valeurs d’exemple, configurez les fournisseurs OAuth souhaités et lisez le [guide de déploiement](./templates/base/DEPLOYMENT.md) inclus dans le projet généré.
+Before using the project with real users, replace every example value, configure the providers you selected, and read the [deployment guide](./templates/base/DEPLOYMENT.md).
 
-## Utiliser le CLI
+## CLI usage
 
-### Installation ponctuelle
+### Interactive mode
 
 ```bash
 npx create-betternest-app my-app
 ```
 
-### Installation globale
+Without options, the CLI prompts for the project name, database, authentication providers, dependency installation, and Git initialization.
 
-```bash
-npm install --global create-betternest-app
-create-betternest-app my-app
-```
-
-### Mode interactif
-
-Sans option, le CLI vous guide pour sélectionner le nom du projet, la base de données, les providers d’authentification, l’installation des dépendances et l’initialisation Git :
-
-```bash
-create-betternest-app my-app
-```
-
-### Mode automatisé
-
-Pour un script ou une CI, fournissez toutes les décisions et utilisez `--yes` :
+### Automated mode
 
 ```bash
 npx create-betternest-app my-app \
@@ -132,9 +111,9 @@ npx create-betternest-app my-app \
   --yes
 ```
 
-### Prévisualiser sans écrire de fichiers
+### Preview without writing files
 
-`--dry-run` résout la sélection, affiche le plan et quitte sans générer de fichiers, initialiser Git ni installer de dépendances :
+`--dry-run` resolves the selection and prints the plan without generating files, initializing Git, or installing dependencies:
 
 ```bash
 npx create-betternest-app my-app \
@@ -144,95 +123,97 @@ npx create-betternest-app my-app \
   --yes
 ```
 
-### Options disponibles
-
-| Option            | Valeur                               | Description                                             |
-| ----------------- | ------------------------------------ | ------------------------------------------------------- |
-| `[project-name]`  | Nom de dossier valide                | Nom du projet généré                                    |
-| `--db=<id>`       | Voir la matrice ci-dessous           | Sélectionne le couple ORM/base de données               |
-| `--auth=<a,b,c>`  | `email-password`, `google`, `github` | Sélectionne les providers, séparés par des virgules     |
-| `--pm=pnpm`       | `pnpm` uniquement                    | Gestionnaire utilisé par le workspace généré            |
-| `--install`       | —                                    | Force l’installation des dépendances                    |
-| `--no-install`    | —                                    | N’installe pas les dépendances                          |
-| `--git`           | —                                    | Force l’initialisation Git et le premier commit         |
-| `--no-git`        | —                                    | N’initialise pas Git                                    |
-| `--yes`, `-y`     | —                                    | Accepte les valeurs par défaut et désactive les prompts |
-| `--dry-run`       | —                                    | Affiche le plan sans écrire de fichiers                 |
-| `--verbose`, `-v` | —                                    | Affiche davantage de détails en cas d’erreur            |
-| `--help`, `-h`    | —                                    | Affiche l’aide complète                                 |
-
-Le CLI refuse les identifiants de base de données ou de provider inconnus, les entrées marquées comme « coming soon » et les gestionnaires de paquets autres que pnpm.
-
-## Choisir sa base de données
-
-La génération propose six combinaisons indépendantes :
-
-| Identifiant CLI      | ORM     | Moteur     | Docker local |
-| -------------------- | ------- | ---------- | ------------ |
-| `prisma-postgresql`  | Prisma  | PostgreSQL | Oui          |
-| `prisma-mysql`       | Prisma  | MySQL      | Oui          |
-| `prisma-sqlite`      | Prisma  | SQLite     | Non          |
-| `drizzle-postgresql` | Drizzle | PostgreSQL | Oui          |
-| `drizzle-mysql`      | Drizzle | MySQL      | Oui          |
-| `drizzle-sqlite`     | Drizzle | SQLite     | Non          |
-
-Quelques exemples :
+### Global installation
 
 ```bash
-# Prisma + SQLite, zéro infrastructure externe
+npm install --global create-betternest-app
+create-betternest-app my-app
+```
+
+### CLI options
+
+| Option            | Value                                | Description                                      |
+| ----------------- | ------------------------------------ | ------------------------------------------------ |
+| `[project-name]`  | Valid folder name                    | Name of the generated project                    |
+| `--db=<id>`       | See the matrix below                 | Selects the ORM/database combination             |
+| `--auth=<a,b,c>`  | `email-password`, `google`, `github` | Selects comma-separated authentication providers |
+| `--pm=pnpm`       | `pnpm` only                          | Package manager used by the generated workspace  |
+| `--install`       | —                                    | Forces dependency installation                   |
+| `--no-install`    | —                                    | Skips dependency installation                    |
+| `--git`           | —                                    | Forces Git initialization and the first commit   |
+| `--no-git`        | —                                    | Skips Git initialization                         |
+| `--yes`, `-y`     | —                                    | Accepts defaults and disables prompts            |
+| `--dry-run`       | —                                    | Prints the resolved plan without writing files   |
+| `--verbose`, `-v` | —                                    | Prints additional error details                  |
+| `--help`, `-h`    | —                                    | Prints the complete CLI help                     |
+
+The CLI rejects unknown database/provider identifiers, entries marked as coming soon, and package managers other than pnpm.
+
+## Database matrix
+
+The generator provides six combinations:
+
+| CLI identifier       | ORM     | Engine     | Local Docker |
+| -------------------- | ------- | ---------- | ------------ |
+| `prisma-postgresql`  | Prisma  | PostgreSQL | Yes          |
+| `prisma-mysql`       | Prisma  | MySQL      | Yes          |
+| `prisma-sqlite`      | Prisma  | SQLite     | No           |
+| `drizzle-postgresql` | Drizzle | PostgreSQL | Yes          |
+| `drizzle-mysql`      | Drizzle | MySQL      | Yes          |
+| `drizzle-sqlite`     | Drizzle | SQLite     | No           |
+
+```bash
+# Prisma + SQLite, with no external infrastructure
 npx create-betternest-app sqlite-app --db=prisma-sqlite --yes
 
-# Drizzle + PostgreSQL, avec provider email uniquement
+# Drizzle + PostgreSQL, with email authentication only
 npx create-betternest-app postgres-app \
   --db=drizzle-postgresql \
   --auth=email-password \
   --yes
 
-# Prisma + MySQL, sans installation automatique
+# Prisma + MySQL, without automatic installation
 npx create-betternest-app mysql-app \
   --db=prisma-mysql \
   --no-install \
   --yes
 ```
 
-Pour PostgreSQL et MySQL, démarrez le service correspondant avant `pnpm db:push` :
+For PostgreSQL and MySQL, start the generated service before pushing the schema:
 
 ```bash
-# Le fichier docker-compose.yml est généré pour les bases serveur.
 docker compose up -d
 pnpm db:push
 ```
 
-SQLite crée son fichier local au chemin indiqué par `DATABASE_URL`. Le fichier est destiné au développement et ne doit pas être commité s’il contient des données réelles.
+SQLite creates its local file at the path specified by `DATABASE_URL`. Keep local database files out of version control when they contain real data.
 
-## Structure d’un projet généré
-
-La sortie du CLI suit une structure de monorepo standardisée :
+## Generated project structure
 
 ```text
 my-app/
 ├── apps/
-│   ├── api/                    # API NestJS, health checks et Dockerfile
-│   └── web/                    # Application Next.js et proxy /api/*
+│   ├── api/                    # NestJS API, health checks, and Dockerfile
+│   └── web/                    # Next.js application and /api/* proxy
 ├── packages/
-│   ├── auth/                   # Instance Better Auth côté serveur
-│   ├── db/                     # Schéma, client et configuration Prisma/Drizzle
-│   ├── email/                  # Email Resend ou SMTP, si email-password est activé
-│   ├── eslint-config/          # Configuration ESLint partagée
-│   ├── typescript-config/      # Configurations TypeScript partagées
-│   ├── ui/                     # Composants UI partagés
+│   ├── auth/                   # Server-side Better Auth instance
+│   ├── db/                     # Prisma/Drizzle schema, client, and config
+│   ├── email/                  # Resend or SMTP when email-password is enabled
+│   ├── eslint-config/          # Shared ESLint configuration
+│   ├── typescript-config/      # Shared TypeScript configurations
+│   ├── ui/                     # Shared UI components
 │   └── ...
-├── .betternest.json            # Manifeste machine-readable des choix de génération
-├── .env.example                # Variables partagées API, auth et base de données
-├── apps/web/.env.example       # Variables propres au frontend Next.js
-├── docker-compose.yml           # Généré pour PostgreSQL ou MySQL
-├── DEPLOYMENT.md               # Guide détaillé des scénarios de déploiement
-├── package.json                # Scripts root du workspace
-├── pnpm-workspace.yaml         # Workspace pnpm et whitelist des builds natifs
-└── turbo.json                  # Tâches et empreinte d’environnement Turborepo
+├── .betternest.json            # Machine-readable generation manifest
+├── .env.example                # Shared API, auth, email, and database variables
+├── apps/web/.env.example       # Next.js-only variables
+├── docker-compose.yml          # Generated for PostgreSQL or MySQL
+├── DEPLOYMENT.md               # Detailed deployment guide
+├── package.json                # Workspace root scripts
+├── pnpm-workspace.yaml         # pnpm workspace and native build allowlist
+└── turbo.json                  # Turborepo tasks and environment inputs
 ```
 
-Le fichier `.betternest.json` ne contient pas de secret. Il décrit le couple ORM/base de données et les providers choisis pour faciliter le diagnostic, l’outillage et de futures migrations de template :
+`.betternest.json` contains no secret. It records the selected database and authentication providers for diagnostics and future template migrations:
 
 ```json
 {
@@ -249,64 +230,62 @@ Le fichier `.betternest.json` ne contient pas de secret. Il décrit le couple OR
 }
 ```
 
-## Architecture applicative
+## Architecture
 
 ```mermaid
 flowchart LR
-  Browser[ navigateur ] -->|same-origin /api/* | Web[Next.js apps/web]
-  Web -->|rewrite serveur API_URL| Api[NestJS apps/api]
+  Browser[Browser] -->|same-origin /api/*| Web[Next.js apps/web]
+  Web -->|server rewrite API_URL| Api[NestJS apps/api]
   Api --> Auth[Better Auth packages/auth]
-  Api --> DB[Prisma ou Drizzle packages/db]
+  Api --> DB[Prisma or Drizzle packages/db]
   Auth --> Email[packages/email]
-  Api --> Health[health et readiness]
+  Api --> Health[Health and readiness checks]
 ```
 
-Le flux d’authentification est centralisé dans `packages/auth`. Le frontend n’importe pas cette instance serveur : il utilise le client Better Auth et appelle les routes `/api/auth/*` à travers le proxy Next.js. L’API est donc le seul endroit qui connaît directement l’adaptateur de base de données et les secrets d’authentification.
+Authentication is centralized in `packages/auth`. The frontend does not import the server-side auth instance; it uses the Better Auth client and calls `/api/auth/*` through the Next.js proxy. The API is the only layer that directly knows the database adapter and authentication secrets.
 
-## Configuration de l’environnement
+## Environment configuration
 
-### Séparation des fichiers `.env`
+### Two environment files
 
-Le projet généré utilise deux fichiers :
+| File            | Consumers                                  | Example variables                                       |
+| --------------- | ------------------------------------------ | ------------------------------------------------------- |
+| Root `.env`     | API, auth, database, email, shared runtime | `DATABASE_URL`, `BETTER_AUTH_SECRET`, `WEB_URL`, `PORT` |
+| `apps/web/.env` | Next.js only                               | `API_URL`, `NEXT_PUBLIC_APP_URL`                        |
 
-| Fichier            | Consommateurs                         | Exemples de variables                                   |
-| ------------------ | ------------------------------------- | ------------------------------------------------------- |
-| `.env` à la racine | API, auth, DB, email, runtime partagé | `DATABASE_URL`, `BETTER_AUTH_SECRET`, `WEB_URL`, `PORT` |
-| `apps/web/.env`    | Next.js uniquement                    | `API_URL`, `NEXT_PUBLIC_APP_URL`                        |
-
-Initialisez-les à partir des exemples :
+Initialize both files:
 
 ```bash
 cp .env.example .env
 cp apps/web/.env.example apps/web/.env
 ```
 
-Ne commitez jamais `.env`, `apps/web/.env` ou un secret OAuth. Les fichiers `.env.example` sont les seuls fichiers d’environnement destinés au versionnement.
+Never commit `.env`, `apps/web/.env`, OAuth secrets, or production database credentials. Only the `.env.example` files are intended for version control.
 
-### Variables principales
+### Main variables
 
-| Variable                      | Fichier         | Obligatoire       | Description                                                              |
-| ----------------------------- | --------------- | ----------------- | ------------------------------------------------------------------------ |
-| `DATABASE_URL`                | `.env`          | Oui               | URL Prisma/Drizzle ou chemin SQLite                                      |
-| `BETTER_AUTH_SECRET`          | `.env`          | Oui               | Secret d’au moins 32 caractères                                          |
-| `WEB_URL`                     | `.env`          | Oui en production | Origine publique du frontend, par exemple `https://app.example.com`      |
-| `PORT`                        | `.env`          | Non               | Port API, `4000` par défaut                                              |
-| `API_URL`                     | `apps/web/.env` | Oui               | URL publique ou interne du backend utilisée par le proxy Next.js         |
-| `NEXT_PUBLIC_APP_URL`         | `apps/web/.env` | Selon usage       | URL frontend utilisée pour les URLs absolues côté serveur                |
-| `TRUSTED_PROXY_HOPS`          | `.env`          | Non               | Nombre de reverse proxies de confiance, `1` par défaut                   |
-| `JSON_BODY_LIMIT`             | `.env`          | Non               | Taille maximale des corps JSON non-auth, `1mb` par défaut                |
-| `CORS_ORIGINS`                | `.env`          | Non               | Liste CSV d’origines explicites pour les clients API directs             |
-| `BETTER_AUTH_TRUSTED_ORIGINS` | `.env`          | Non               | Liste CSV d’origines frontend supplémentaires autorisées par Better Auth |
-| `RATE_LIMIT_MAX`              | `.env`          | Non               | Nombre de tentatives par fenêtre, `5` par défaut                         |
-| `RATE_LIMIT_WINDOW`           | `.env`          | Non               | Fenêtre en secondes, `900` par défaut                                    |
+| Variable                      | File            | Required           | Description                                                   |
+| ----------------------------- | --------------- | ------------------ | ------------------------------------------------------------- |
+| `DATABASE_URL`                | `.env`          | Yes                | Prisma/Drizzle URL or SQLite path                             |
+| `BETTER_AUTH_SECRET`          | `.env`          | Yes                | Secret containing at least 32 characters                      |
+| `WEB_URL`                     | `.env`          | Yes in production  | Public frontend origin, for example `https://app.example.com` |
+| `PORT`                        | `.env`          | No                 | API port, `4000` by default                                   |
+| `API_URL`                     | `apps/web/.env` | Yes                | Backend URL used by the Next.js proxy                         |
+| `NEXT_PUBLIC_APP_URL`         | `apps/web/.env` | Depending on usage | Frontend URL used for absolute server-rendered URLs           |
+| `TRUSTED_PROXY_HOPS`          | `.env`          | No                 | Number of trusted reverse proxies, `1` by default             |
+| `JSON_BODY_LIMIT`             | `.env`          | No                 | Maximum non-auth JSON body size, `1mb` by default             |
+| `CORS_ORIGINS`                | `.env`          | No                 | Comma-separated explicit origins for direct API clients       |
+| `BETTER_AUTH_TRUSTED_ORIGINS` | `.env`          | No                 | Additional frontend origins trusted by Better Auth            |
+| `RATE_LIMIT_MAX`              | `.env`          | No                 | Attempts per rate-limit window, `5` by default                |
+| `RATE_LIMIT_WINDOW`           | `.env`          | No                 | Window length in seconds, `900` by default                    |
 
-Générez un secret robuste :
+Generate a strong secret:
 
 ```bash
 openssl rand -base64 32
 ```
 
-Avec les credentials activés, n’utilisez jamais `*` dans `CORS_ORIGINS`. Déclarez des origines explicites, par exemple :
+When credentials are enabled, never use `*` in `CORS_ORIGINS`. Declare explicit origins instead:
 
 ```dotenv
 WEB_URL=https://app.example.com
@@ -314,11 +293,11 @@ CORS_ORIGINS=https://admin.example.com,https://mobile.example.com
 BETTER_AUTH_TRUSTED_ORIGINS=https://staging.example.com
 ```
 
-Vercel injecte automatiquement `VERCEL_URL` ; cette origine est ajoutée aux origines de confiance Better Auth pour les previews. Les fournisseurs Google et GitHub doivent toutefois accepter les URLs de callback correspondant à votre stratégie de déploiement.
+Vercel injects `VERCEL_URL` automatically. That origin is added to Better Auth trusted origins for preview deployments. Google and GitHub must still be configured with callback URLs that match your deployment strategy.
 
-## Développement local
+## Local development
 
-Depuis la racine d’un projet généré :
+From the root of a generated project:
 
 ```bash
 pnpm install
@@ -327,39 +306,37 @@ pnpm db:push
 pnpm dev
 ```
 
-Les scripts disponibles sont :
+| Script                   | Usage                                             |
+| ------------------------ | ------------------------------------------------- |
+| `pnpm dev`               | Starts the frontend and API through Turborepo     |
+| `pnpm build`             | Builds all packages and applications              |
+| `pnpm lint`              | Runs workspace lint checks                        |
+| `pnpm format`            | Formats TypeScript, TSX, Markdown, and JSON files |
+| `pnpm db:generate`       | Generates ORM clients or database artifacts       |
+| `pnpm db:push`           | Synchronizes the schema in local development      |
+| `pnpm db:studio`         | Opens the selected ORM studio                     |
+| `pnpm db:migrate:deploy` | Applies production migrations                     |
 
-| Script                   | Usage                                                  |
-| ------------------------ | ------------------------------------------------------ |
-| `pnpm dev`               | Lance le frontend et l’API via Turborepo               |
-| `pnpm build`             | Construit tous les packages et applications            |
-| `pnpm lint`              | Lance les contrôles de lint des workspaces             |
-| `pnpm format`            | Formate les fichiers TypeScript, TSX, Markdown et JSON |
-| `pnpm db:generate`       | Génère le client ORM ou les artefacts DB               |
-| `pnpm db:push`           | Synchronise le schéma dans un environnement local      |
-| `pnpm db:studio`         | Ouvre l’interface de studio de l’ORM sélectionné       |
-| `pnpm db:migrate:deploy` | Applique les migrations de production                  |
-
-Pour lancer une seule application :
+To run one application directly:
 
 ```bash
 pnpm --filter web dev
 pnpm --filter api start:dev
 ```
 
-Les ports par défaut sont `3000` pour Next.js et `4000` pour NestJS. Si vous modifiez `PORT`, adaptez aussi `API_URL` dans `apps/web/.env`.
+The default ports are `3000` for Next.js and `4000` for NestJS. If you change `PORT`, update `API_URL` in `apps/web/.env` accordingly.
 
-## Authentification
+## Authentication
 
-Les providers sont sélectionnés à la génération :
+Providers are selected during generation:
 
-| Provider         | Fonctionnalités                                            | Variables principales                               |
-| ---------------- | ---------------------------------------------------------- | --------------------------------------------------- |
-| `email-password` | Inscription, connexion, vérification email, reset password | `EMAIL_PROVIDER`, `EMAIL_FROM`, puis Resend ou SMTP |
-| `google`         | OAuth Google                                               | `GOOGLE_CLIENT_ID`, `GOOGLE_CLIENT_SECRET`          |
-| `github`         | OAuth GitHub                                               | `GITHUB_CLIENT_ID`, `GITHUB_CLIENT_SECRET`          |
+| Provider         | Features                                                 | Main variables                                                |
+| ---------------- | -------------------------------------------------------- | ------------------------------------------------------------- |
+| `email-password` | Sign-up, sign-in, email verification, and password reset | `EMAIL_PROVIDER`, `EMAIL_FROM`, then Resend or SMTP variables |
+| `google`         | Google OAuth                                             | `GOOGLE_CLIENT_ID`, `GOOGLE_CLIENT_SECRET`                    |
+| `github`         | GitHub OAuth                                             | `GITHUB_CLIENT_ID`, `GITHUB_CLIENT_SECRET`                    |
 
-Le provider email/password utilise le package `@repo/email`. Pour Resend :
+The email/password provider uses `@repo/email`. For Resend:
 
 ```dotenv
 EMAIL_PROVIDER=resend
@@ -367,7 +344,7 @@ EMAIL_FROM=noreply@example.com
 RESEND_API_KEY=re_...
 ```
 
-Pour SMTP :
+For SMTP:
 
 ```dotenv
 EMAIL_PROVIDER=smtp
@@ -379,27 +356,22 @@ SMTP_PASSWORD=...
 SMTP_SECURE=false
 ```
 
-En local, [Mailpit](https://github.com/axllent/mailpit) peut servir de mail catcher : configurez `SMTP_HOST=localhost` et `SMTP_PORT=1025`.
+For local development, [Mailpit](https://github.com/axllent/mailpit) can act as a mail catcher. Set `SMTP_HOST=localhost` and `SMTP_PORT=1025`.
 
-Pour Google, l’URL de callback locale est :
+Local OAuth callback URLs are:
 
 ```text
 http://localhost:3000/api/auth/callback/google
-```
-
-Pour GitHub :
-
-```text
 http://localhost:3000/api/auth/callback/github
 ```
 
-En production, remplacez `localhost:3000` par l’origine publique définie dans `WEB_URL`. Le proxy frontend doit rester l’entrée du navigateur ; ne configurez pas le port direct de l’API comme origine OAuth visible par l’utilisateur.
+In production, replace `localhost:3000` with the public origin defined in `WEB_URL`. The frontend proxy should remain the browser entry point; do not expose the API port as the OAuth origin visible to users.
 
-## Base de données et migrations
+## Database and migrations
 
-### Développement
+### Development
 
-`pnpm db:push` est pratique pour un environnement local ou jetable. Il applique le schéma directement et accélère l’itération.
+`pnpm db:push` is convenient for local or disposable environments because it applies the schema directly:
 
 ```bash
 pnpm db:generate
@@ -408,86 +380,84 @@ pnpm db:push
 
 ### Production
 
-La boilerplate expose un contrat commun :
+The boilerplate exposes one common production contract:
 
 ```bash
 pnpm db:migrate:deploy
 ```
 
-Ce script est délégué à l’outil approprié :
+The generated database package delegates to the appropriate tool:
 
-| ORM     | Commande sous-jacente   |
+| ORM     | Underlying command      |
 | ------- | ----------------------- |
 | Prisma  | `prisma migrate deploy` |
 | Drizzle | `drizzle-kit migrate`   |
 
-L’entrypoint Docker exécute ce contrat avant le démarrage de l’API. Ne remplacez pas cette étape de production par `db:push` sans avoir évalué les risques de perte ou de modification destructive de données.
+The Docker entrypoint runs this contract before starting the API. Do not replace it with `db:push` in production without evaluating the risk of destructive schema changes or data loss.
 
-Les fichiers de migration doivent être générés, relus, testés sur une base de staging et committés avec le code. Prévoyez des sauvegardes et une procédure de rollback indépendante du mécanisme de génération.
+Generate migrations, review them, test them against staging, and commit them with the application code. Maintain backups and a rollback procedure independent from the template generator.
 
-## API, proxy et santé
+## API and health checks
 
-### Proxy same-origin
+### Same-origin proxy
 
-Le frontend appelle les routes suivantes :
+The frontend calls routes such as:
 
 ```text
 /api/auth/*
 /api/health
 /api/health/db
-/api/<vos-routes-métier>
+/api/<your-business-routes>
 ```
 
-Next.js réécrit les requêtes `/api/*` vers `API_URL`. Le navigateur ne doit pas construire des URLs différentes pour chaque service. Pour un client non-browser, CORS peut être utilisé avec une liste explicite dans `CORS_ORIGINS`.
+Next.js rewrites `/api/*` to `API_URL`. Browser code should not construct a different URL for each service. Direct API clients can use CORS with an explicit `CORS_ORIGINS` list.
 
-### Health checks
+### Health endpoints
 
-| Endpoint             | Dépend de la DB | Usage                                        |
-| -------------------- | --------------- | -------------------------------------------- |
-| `GET /api/health`    | Non             | Liveness probe et vérification du processus  |
-| `GET /api/health/db` | Oui             | Readiness et vérification de la connexion DB |
-
-Exemples :
+| Endpoint             | Requires database | Usage                                     |
+| -------------------- | ----------------- | ----------------------------------------- |
+| `GET /api/health`    | No                | Liveness probe and process check          |
+| `GET /api/health/db` | Yes               | Readiness and database connectivity check |
 
 ```bash
 curl -i http://localhost:4000/api/health
 curl -i http://localhost:4000/api/health/db
 ```
 
-La réponse de santé DB ne doit pas exposer les détails de connexion ou de stack trace. Les détails de diagnostic restent dans les logs serveur.
+The database health response does not expose connection details or stack traces. Diagnostic details remain in server logs.
 
-## Sécurité et exploitation
+## Security and operations
 
-La configuration générée fournit plusieurs garde-fous, mais elle doit être complétée par la plateforme et les pratiques de l’équipe :
+The generated configuration includes several safeguards, but production security remains an operational responsibility:
 
-- Le démarrage de l’API valide `DATABASE_URL`, `BETTER_AUTH_SECRET`, `PORT`, `RATE_LIMIT_MAX` et `RATE_LIMIT_WINDOW`, puis s’arrête avec un message explicite si une valeur est invalide.
-- Les headers `X-Content-Type-Options`, `X-Frame-Options`, `Referrer-Policy` et `Permissions-Policy` sont appliqués par l’API.
-- `X-Request-ID` est généré ou propagé pour faciliter le rapprochement entre une requête et les logs.
-- Les corps JSON non-auth sont limités par `JSON_BODY_LIMIT`.
-- Les endpoints d’authentification sont protégés par un rate limiting par endpoint et par IP. Les valeurs par défaut sont de 5 tentatives sur 15 minutes.
-- Les déploiements multi-instance doivent utiliser un stockage partagé, tel que Redis, si les compteurs de rate limiting doivent être cohérents entre plusieurs processus.
-- Le runner Docker utilise un utilisateur non root et l’entrypoint applique les migrations avant le démarrage.
-- Les origins CORS et Better Auth sont explicites. N’utilisez jamais `*` avec des credentials.
+- API startup validates `DATABASE_URL`, `BETTER_AUTH_SECRET`, `PORT`, `RATE_LIMIT_MAX`, and `RATE_LIMIT_WINDOW`, then exits with a clear message when a value is invalid.
+- The API applies `X-Content-Type-Options`, `X-Frame-Options`, `Referrer-Policy`, and `Permissions-Policy` headers.
+- `X-Request-ID` is generated or propagated to correlate requests with logs.
+- Non-auth JSON bodies are limited by `JSON_BODY_LIMIT`.
+- Authentication endpoints use per-endpoint, per-IP rate limiting. The default is 5 attempts per 15 minutes.
+- Multi-instance deployments should use shared storage such as Redis when rate-limit counters must be consistent across processes.
+- The Docker runner uses a non-root user and the entrypoint applies migrations before startup.
+- CORS and Better Auth origins are explicit. Never use `*` with credentials.
 
-La valeur `TRUSTED_PROXY_HOPS` doit correspondre à la topologie réelle. Une valeur trop élevée peut permettre de faire confiance à un en-tête IP fourni par un client ; une valeur trop faible peut rendre le rate limiting moins précis derrière un reverse proxy.
+`TRUSTED_PROXY_HOPS` must match the real topology. A value that is too high can make the application trust a client-controlled IP header; a value that is too low can make rate limiting less accurate behind a reverse proxy.
 
-## Déploiement
+## Deployment
 
-Le projet généré contient un `Dockerfile` pour l’API et des configurations de plateforme. Le frontend et le backend peuvent être déployés séparément.
+Generated projects include an API Dockerfile and platform configuration files. The frontend and backend can be deployed independently.
 
-### Frontend sur Vercel
+### Frontend on Vercel
 
-1. Poussez le projet généré dans votre dépôt GitHub.
-2. Importez le dépôt dans Vercel.
-3. Définissez le répertoire racine sur `apps/web` si votre configuration Vercel utilise ce mode.
-4. Configurez `API_URL` avec l’URL du backend.
-5. Configurez `NEXT_PUBLIC_APP_URL` avec l’URL publique du frontend si votre application l’utilise.
-6. Déployez le frontend et copiez son URL publique.
-7. Configurez `WEB_URL` avec cette URL dans l’environnement du backend, puis redéployez le backend.
+1. Push the generated project to GitHub.
+2. Import the repository into Vercel.
+3. Set the root directory to `apps/web` when using Vercel’s root-directory mode.
+4. Configure `API_URL` with the backend URL.
+5. Configure `NEXT_PUBLIC_APP_URL` with the public frontend URL when the application uses it.
+6. Deploy the frontend and copy its public URL.
+7. Set `WEB_URL` to that URL in the backend environment and redeploy the backend.
 
-### Backend avec Docker
+### Backend with Docker
 
-Depuis la racine du projet généré :
+Build from the generated project root:
 
 ```bash
 docker build -f apps/api/Dockerfile -t my-app-api .
@@ -496,17 +466,17 @@ docker run --rm -p 4000:4000 \
   my-app-api
 ```
 
-L’image est construite en plusieurs étapes : pruning Turborepo, installation avec le lockfile, compilation, puis runner de production. Le runner contient pnpm car l’entrypoint doit exécuter `pnpm db:migrate:deploy`.
+The image uses multiple stages: Turborepo pruning, lockfile-based installation, compilation, and a production runner. The runner includes pnpm because the entrypoint executes `pnpm db:migrate:deploy`.
 
-### Railway, Fly.io et Render
+### Railway, Fly.io, and Render
 
-| Plateforme | Fichier        | Notes                                                       |
-| ---------- | -------------- | ----------------------------------------------------------- |
-| Railway    | `railway.json` | Attachez PostgreSQL ou configurez votre base externe        |
-| Fly.io     | `fly.toml`     | Utilisez un secret pour chaque variable sensible            |
-| Render     | `render.yaml`  | Le blueprint peut provisionner l’API et une base PostgreSQL |
+| Platform | File           | Notes                                               |
+| -------- | -------------- | --------------------------------------------------- |
+| Railway  | `railway.json` | Attach PostgreSQL or configure an external database |
+| Fly.io   | `fly.toml`     | Store each sensitive value as a platform secret     |
+| Render   | `render.yaml`  | The blueprint can provision the API and PostgreSQL  |
 
-Quel que soit l’hébergeur, configurez au minimum :
+At minimum, configure:
 
 ```dotenv
 DATABASE_URL=...
@@ -516,11 +486,11 @@ PORT=4000
 TRUSTED_PROXY_HOPS=1
 ```
 
-Ne mettez pas les secrets dans `Dockerfile`, `railway.json`, `fly.toml`, `render.yaml` ou le dépôt Git. Utilisez les variables secrètes de la plateforme.
+Do not place secrets in `Dockerfile`, `railway.json`, `fly.toml`, `render.yaml`, or Git. Use the hosting platform’s secret variables.
 
-### VPS avec Docker Compose
+### VPS with Docker Compose
 
-Un déploiement VPS doit généralement contenir :
+A typical VPS deployment includes:
 
 ```yaml
 services:
@@ -547,13 +517,13 @@ volumes:
   pgdata:
 ```
 
-Ajoutez un reverse proxy TLS comme Caddy, nginx ou Traefik devant l’API et le frontend. Les certificats, les sauvegardes, la supervision et la rotation des secrets restent des responsabilités d’exploitation.
+Add a TLS reverse proxy such as Caddy, nginx, or Traefik in front of the frontend and API. Certificates, backups, monitoring, and secret rotation remain operational responsibilities.
 
-Le projet généré contient également un [guide de déploiement détaillé](./templates/base/DEPLOYMENT.md) couvrant les scénarios Railway, Fly.io, Render, Vercel et VPS.
+The generated project also includes a [detailed deployment guide](./templates/base/DEPLOYMENT.md) covering Railway, Fly.io, Render, Vercel, and VPS scenarios.
 
-## Tester le générateur
+## Testing the boilerplate
 
-Ces commandes s’exécutent dans le dépôt de la boilerplate, pas dans un projet généré :
+These commands run in the boilerplate repository, not in a generated application:
 
 ```bash
 pnpm install
@@ -564,56 +534,56 @@ pnpm test:pack
 pnpm smoke-test
 ```
 
-| Commande                | Vérification                                                                         |
-| ----------------------- | ------------------------------------------------------------------------------------ |
-| `pnpm lint`             | Typecheck strict du générateur et du CLI                                             |
-| `pnpm build`            | Build du package `create-betternest-app`                                             |
-| `pnpm test:unit`        | Contrats du catalogue, six variantes DB, tokens, markers, manifestes et flags        |
-| `pnpm test:pack`        | Installe le tarball npm dans un consumer isolé et compare la sortie à `examples/mvp` |
-| `pnpm smoke-test`       | Génère un projet temporaire puis lance installation, génération ORM, build et lint   |
-| `pnpm generate:default` | Régénère `examples/mvp` avec la sélection de référence                               |
+| Command                 | Verification                                                                                 |
+| ----------------------- | -------------------------------------------------------------------------------------------- |
+| `pnpm lint`             | Strict typecheck of the generator and CLI                                                    |
+| `pnpm build`            | Builds the `create-betternest-app` package                                                   |
+| `pnpm test:unit`        | Checks catalog entries, six DB variants, tokens, markers, manifests, and flags               |
+| `pnpm test:pack`        | Installs the npm tarball in an isolated consumer and compares its output with `examples/mvp` |
+| `pnpm smoke-test`       | Generates a temporary project and runs installation, ORM generation, build, and lint         |
+| `pnpm generate:default` | Regenerates `examples/mvp` with the reference selection                                      |
 
-`examples/mvp` est une sortie de référence versionnée. Toute modification de template doit être suivie d’une régénération et d’une exécution de `pnpm test:pack`. Les artefacts de build et les lockfiles de projets générés ne doivent pas être ajoutés à cette référence.
+`examples/mvp` is a versioned reference output. Any template change must be followed by regeneration and `pnpm test:pack`. Build artifacts and generated-project lockfiles must not be added to this reference.
 
-Le workflow CI vérifie le générateur, construit les variantes DB et lance le smoke runtime selon sa matrice. Le test d’image Docker doit être exécuté dans un environnement disposant de Docker.
+The CI workflow verifies the generator, builds the database matrix, and runs the generated-project smoke matrix. Docker image builds require an environment with Docker available.
 
-## Étendre la boilerplate
+## Extending the generator
 
-La génération est pilotée par des manifests. Les composants sont séparés en :
+Generation is driven by manifests and separated into composable template areas:
 
 ```text
 templates/
-├── base/                 # fichiers communs au projet généré
-├── db/                   # manifests et fragments Prisma/Drizzle
-└── auth-providers/       # manifests et fragments email/OAuth
+├── base/                 # Files shared by every generated project
+├── db/                   # Prisma/Drizzle manifests and fragments
+└── auth-providers/       # Email and OAuth manifests and fragments
 ```
 
-### Ajouter une variante DB
+### Add a database variant
 
-1. Créez un dossier sous `templates/db/<id>`.
-2. Ajoutez un `manifest.ts` conforme à `DbManifest`.
-3. Ajoutez les fragments d’adaptateur Better Auth, le package DB, le schéma, la configuration ORM, les scripts et l’environnement.
-4. Ajoutez l’entrée au catalogue si nécessaire.
-5. Ajoutez la variante à la matrice CI et au test contractuel.
-6. Régénérez `examples/mvp` et vérifiez le tarball.
+1. Create a directory under `templates/db/<id>`.
+2. Add a `manifest.ts` satisfying `DbManifest`.
+3. Add the Better Auth adapter fragments, database package, schema, ORM configuration, scripts, and environment fragment.
+4. Add the entry to the catalog when required.
+5. Add the variant to the CI matrix and contract tests.
+6. Regenerate `examples/mvp` and verify the packaged CLI.
 
-### Ajouter un provider d’authentification
+### Add an authentication provider
 
-1. Créez un dossier sous `templates/auth-providers/<id>`.
-2. Déclarez son `ProviderManifest`.
-3. Ajoutez le fragment server-side, le composant UI, les variables d’environnement et les instructions README.
-4. Utilisez des imports UI spécifiques à sign-in et sign-up si les deux pages n’utilisent pas les mêmes composants.
-5. Ajoutez les tests de génération correspondants.
+1. Create a directory under `templates/auth-providers/<id>`.
+2. Declare a `ProviderManifest`.
+3. Add the server fragment, UI component, environment variables, and README setup instructions.
+4. Use page-specific UI imports when sign-in and sign-up render different components.
+5. Add the corresponding generation assertions.
 
-### Modifier un template existant
+### Modify an existing template
 
-Les fichiers `.hbs` sont tokenisés puis copiés dans le projet généré. Les fichiers composés, comme `package.json`, le README, les pages d’authentification et `packages/auth/src/index.ts`, sont assemblés à partir de fragments. Respectez les markers existants et ne placez jamais de secret dans un template.
+`.hbs` files are tokenized and copied to the generated project. Composed files such as `package.json`, the README, authentication pages, and `packages/auth/src/index.ts` are assembled from fragments. Preserve existing markers and never put secrets into templates.
 
-Lisez [CONTRIBUTING.md](./CONTRIBUTING.md) avant de modifier le catalogue, les conventions de fusion JSON, les workflows ou le processus de publication.
+Read [CONTRIBUTING.md](./CONTRIBUTING.md) before changing the catalog, JSON merge rules, workflows, or release process.
 
-## Versionner et publier le CLI
+## Versioning and releases
 
-Le package publiable est `create-betternest-app`, actuellement en version `0.6.6`. Les changements qui affectent le CLI ou la sortie générée doivent être accompagnés d’un changeset :
+The publishable package is `create-betternest-app`, currently version `0.6.6`. Changes that affect the CLI or generated output should include a Changeset:
 
 ```bash
 pnpm changeset
@@ -622,45 +592,45 @@ pnpm test:pack
 pnpm build
 ```
 
-Le workflow de release utilise Changesets. Les commandes locales disponibles sont :
+The release workflow uses Changesets. Available local commands include:
 
 ```bash
 pnpm version-packages
 pnpm release
 ```
 
-La publication nécessite les credentials npm et les protections CI appropriées. Ne publiez pas depuis un poste de développement sans vérifier le tarball et la compatibilité des six variantes.
+Publishing requires npm credentials and appropriate CI protections. Do not publish from a development workstation before checking the tarball and the six database variants.
 
-## Dépannage
+## Troubleshooting
 
-### Le CLI refuse `--pm=npm`, `--pm=yarn` ou `--pm=bun`
+### The CLI rejects `--pm=npm`, `--pm=yarn`, or `--pm=bun`
 
-C’est volontaire. Le CLI peut être exécuté avec `npx`, mais le workspace généré supporte officiellement pnpm. Utilisez `--pm=pnpm`, installez pnpm et relancez la génération.
+This is intentional. The CLI can be launched with `npx`, but the generated workspace officially supports pnpm. Use `--pm=pnpm`, install pnpm, and regenerate the project.
 
-### L’API s’arrête immédiatement au démarrage
+### The API exits immediately on startup
 
-Lisez le message de validation d’environnement et vérifiez notamment :
+Read the environment validation message and check the main variables:
 
 ```bash
 cat .env
 pnpm db:generate
 ```
 
-`BETTER_AUTH_SECRET` doit contenir au moins 32 caractères, `PORT` doit être un entier compris entre 1 et 65535 et les paramètres de rate limiting doivent être des entiers positifs.
+`BETTER_AUTH_SECRET` must contain at least 32 characters, `PORT` must be an integer between 1 and 65535, and rate-limit settings must be positive integers.
 
-### Les cookies ou les redirections OAuth ne fonctionnent pas
+### Cookies or OAuth redirects do not work
 
-Vérifiez que :
+Check that:
 
-1. `WEB_URL` correspond exactement à l’origine vue par le navigateur, avec le bon protocole et sans chemin inutile ;
-2. `API_URL` pointe vers le backend attendu dans `apps/web/.env` ;
-3. les callbacks Google/GitHub utilisent le domaine frontend et `/api/auth/callback/<provider>` ;
-4. les origins supplémentaires sont déclarées dans `BETTER_AUTH_TRUSTED_ORIGINS` ;
-5. le backend a été redéployé après modification de ses variables.
+1. `WEB_URL` exactly matches the browser-visible origin, including the protocol and excluding unnecessary paths;
+2. `API_URL` points to the expected backend in `apps/web/.env`;
+3. Google/GitHub callbacks use the frontend domain and `/api/auth/callback/<provider>`;
+4. additional origins are listed in `BETTER_AUTH_TRUSTED_ORIGINS`;
+5. the backend was redeployed after changing its environment variables.
 
-### PostgreSQL ou MySQL ne répond pas
+### PostgreSQL or MySQL is unavailable
 
-Vérifiez le service Docker et la valeur de `DATABASE_URL` :
+Check the Docker service and `DATABASE_URL`:
 
 ```bash
 docker compose ps
@@ -668,32 +638,32 @@ docker compose logs --follow
 pnpm db:push
 ```
 
-Pour SQLite, omettez Docker et utilisez un chemin local compatible avec la variante générée.
+For SQLite, omit Docker and use a path compatible with the generated variant.
 
-### Le build Docker échoue pendant les migrations
+### The Docker build fails during migrations
 
-Construisez depuis la racine du projet, pas depuis `apps/api` :
+Build from the project root, not from `apps/api`:
 
 ```bash
 docker build -f apps/api/Dockerfile .
 ```
 
-Le contexte racine est nécessaire à `turbo prune`, au workspace pnpm et aux packages partagés.
+The root context is required by `turbo prune`, the pnpm workspace, and shared packages.
 
-### `pnpm test:pack` signale une différence avec `examples/mvp`
+### `pnpm test:pack` reports a difference from `examples/mvp`
 
-Régénérez d’abord la référence puis relancez le test :
+Regenerate the reference first, then rerun the test:
 
 ```bash
 pnpm generate:default
 pnpm test:pack
 ```
 
-Si la différence est intentionnelle, vérifiez le diff, mettez à jour le template et documentez la modification dans un changeset. Ne commitez pas de `node_modules`, de fichiers `dist`, de `tsbuildinfo` ni de lockfile produit par un projet de test.
+If the difference is intentional, review the diff, update the template, and document the change in a Changeset. Do not commit `node_modules`, `dist` files, `tsbuildinfo`, or lockfiles produced by a test project.
 
-## Contribuer
+## Contributing
 
-Les contributions sont les bienvenues. Avant d’ouvrir une pull request :
+Contributions are welcome. Before opening a pull request:
 
 ```bash
 pnpm install
@@ -703,35 +673,27 @@ pnpm test:pack
 pnpm smoke-test
 ```
 
-Décrivez dans la pull request :
+Describe the problem, expected behavior, affected templates/manifests/workflows, tested database/provider variants, documentation changes, and matching Changeset when the CLI or generated output changes.
 
-- le problème traité et le comportement attendu ;
-- les templates, manifests ou workflows concernés ;
-- les variantes DB et providers testés ;
-- les changements de documentation ;
-- le changeset correspondant si la sortie du CLI ou le package publiable change.
+See [CONTRIBUTING.md](./CONTRIBUTING.md) for detailed conventions. Open issues and feature requests in the [GitHub repository](https://github.com/bellandry/betternest-boilerplate/issues).
 
-Consultez [CONTRIBUTING.md](./CONTRIBUTING.md) pour les conventions détaillées. Les issues et demandes d’évolution peuvent être ouvertes sur le [dépôt GitHub](https://github.com/bellandry/betternest-boilerplate/issues).
+## References
 
-## Références
+1. [Next.js documentation](https://nextjs.org/docs)
+2. [NestJS documentation](https://docs.nestjs.com/)
+3. [Better Auth documentation](https://better-auth.com/docs)
+4. [Prisma documentation](https://www.prisma.io/docs)
+5. [Drizzle ORM documentation](https://orm.drizzle.team/docs/overview)
+6. [pnpm documentation](https://pnpm.io/)
+7. [Turborepo documentation](https://turborepo.com/docs)
+8. [Docker documentation](https://docs.docker.com/)
+9. [Vercel documentation](https://vercel.com/docs)
+10. [Railway documentation](https://docs.railway.com/)
+11. [Fly.io documentation](https://fly.io/docs/)
+12. [Render documentation](https://render.com/docs)
+13. [Repository contribution guide](./CONTRIBUTING.md)
+14. [Template deployment guide](./templates/base/DEPLOYMENT.md)
 
-Les liens suivants complètent cette documentation avec les références officielles des technologies utilisées :
+## License
 
-1. [Documentation Next.js](https://nextjs.org/docs)
-2. [Documentation NestJS](https://docs.nestjs.com/)
-3. [Documentation Better Auth](https://better-auth.com/docs)
-4. [Documentation Prisma](https://www.prisma.io/docs)
-5. [Documentation Drizzle ORM](https://orm.drizzle.team/docs/overview)
-6. [Documentation pnpm](https://pnpm.io/)
-7. [Documentation Turborepo](https://turborepo.com/docs)
-8. [Documentation Docker](https://docs.docker.com/)
-9. [Documentation Vercel](https://vercel.com/docs)
-10. [Documentation Railway](https://docs.railway.com/)
-11. [Documentation Fly.io](https://fly.io/docs/)
-12. [Documentation Render](https://render.com/docs)
-13. [Guide de contribution du dépôt](./CONTRIBUTING.md)
-14. [Guide de déploiement inclus dans les templates](./templates/base/DEPLOYMENT.md)
-
-## Licence
-
-Le package est déclaré sous licence **MIT** dans son manifeste npm. Ajoutez ou restaurez le fichier de licence du dépôt avant une distribution officielle si votre processus de publication l’exige.
+The package manifest declares the project under the **MIT** license. See the [MIT License](https://opensource.org/licenses/MIT) for the license terms.
