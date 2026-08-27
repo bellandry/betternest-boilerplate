@@ -47,7 +47,8 @@ export const auth = betterAuth({
         html: `<a href="${url}">Click here to verify your email</a>`,
       });
     },
-    sendOnSignUp: true,
+    // The admin seed sets this internal flag because it verifies the account itself.
+    sendOnSignUp: process.env.BETTERNEST_ADMIN_SEED !== 'true',
   },
 
   socialProviders: {

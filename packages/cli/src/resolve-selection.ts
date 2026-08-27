@@ -1,5 +1,10 @@
 import { confirm } from '@clack/prompts';
-import { listAuthProviders, listDatabases, listDbEngines, type CatalogEntry } from '@repo/generator/catalog';
+import {
+  listAuthProviders,
+  listDatabases,
+  listDbEngines,
+  type CatalogEntry,
+} from '@repo/generator/catalog';
 import { DEFAULT_SELECTION } from '@repo/generator/default-selection';
 import type { Selection } from '@repo/generator/types';
 import { CliError } from './errors';
@@ -33,7 +38,10 @@ function assertValidDb(id: string, dbs: CatalogEntry[]): void {
     throw new CliError(`Unknown database "${id}".`, `Valid values: ${valid.join(', ')}`);
   }
   if (match.status === 'coming-soon') {
-    throw new CliError(`Database "${id}" is coming soon and not selectable yet.`, `Valid values: ${valid.join(', ')}`);
+    throw new CliError(
+      `Database "${id}" is coming soon and not selectable yet.`,
+      `Valid values: ${valid.join(', ')}`,
+    );
   }
 }
 
@@ -45,7 +53,10 @@ function assertValidAuth(ids: string[], providers: CatalogEntry[]): void {
       throw new CliError(`Unknown auth provider "${id}".`, `Valid values: ${valid.join(', ')}`);
     }
     if (match.status === 'coming-soon') {
-      throw new CliError(`Auth provider "${id}" is coming soon and not selectable yet.`, `Valid values: ${valid.join(', ')}`);
+      throw new CliError(
+        `Auth provider "${id}" is coming soon and not selectable yet.`,
+        `Valid values: ${valid.join(', ')}`,
+      );
     }
   }
 }
@@ -62,7 +73,10 @@ function ensureRequired(ids: string[], providers: CatalogEntry[]): string[] {
 function resolvePm(flagPm: string | undefined): PackageManager {
   if (flagPm) {
     if (!isPackageManager(flagPm)) {
-      throw new CliError(`Unknown package manager "${flagPm}".`, `Valid values: ${PACKAGE_MANAGERS.join(', ')}`);
+      throw new CliError(
+        `Unknown package manager "${flagPm}".`,
+        `Valid values: ${PACKAGE_MANAGERS.join(', ')}`,
+      );
     }
     return flagPm;
   }
@@ -84,14 +98,33 @@ export async function resolvePlan(flags: RawFlags, templatesDir: string): Promis
     if (flags.auth.length === 0) throw new CliError('--auth needs at least one provider id.');
     assertValidAuth(flags.auth, providers);
   }
+  if (flags.skipAuth && flags.auth !== undefined) {
+    throw new CliError('--skip-auth cannot be combined with --auth.');
+  }
+  if (flags.skipEmail && flags.auth?.includes(REQUIRED_PROVIDER)) {
+    throw new CliError('--skip-email cannot be combined with --auth=email-password.');
+  }
   const pm = resolvePm(flags.pm);
+  const skipAuth = flags.skipAuth;
+  const skipEmail = flags.skipEmail || skipAuth;
+  const requestedAuth = flags.auth ?? DEFAULT_SELECTION.authProviders;
+  const filteredAuth = skipEmail
+    ? requestedAuth.filter((id) => id !== REQUIRED_PROVIDER)
+    : requestedAuth;
 
   // ── Non-interactive ──
   if (flags.yes) {
     const selection: Selection = {
       projectName: flags.projectName ?? DEFAULT_SELECTION.projectName,
       db: flags.db ?? DEFAULT_SELECTION.db,
-      authProviders: ensureRequired(flags.auth ?? DEFAULT_SELECTION.authProviders, providers),
+      authProviders: skipAuth
+        ? []
+        : skipEmail
+          ? filteredAuth
+          : ensureRequired(filteredAuth, providers),
+      skipAuth,
+      skipEmail,
+      skipUi: flags.skipUi,
     };
     return {
       selection,
@@ -121,17 +154,28 @@ export async function resolvePlan(flags: RawFlags, templatesDir: string): Promis
     db = await promptDbCombo(dbs, engine, DEFAULT_SELECTION.db);
   }
 
-  const authProviders = ensureRequired(
-    await promptAuthProviders(providers, flags.auth ?? DEFAULT_SELECTION.authProviders),
-    providers,
-  );
+  const promptedAuth = skipAuth
+    ? []
+    : await promptAuthProviders(providers, filteredAuth, {
+        includeRequired: !skipEmail,
+        allowEmpty: false,
+      });
+  const authProviders =
+    skipAuth || skipEmail ? promptedAuth : ensureRequired(promptedAuth, providers);
   const chosenPm = await promptPackageManager(flags.pm ? (pm as PackageManager) : undefined);
   const doInstall =
     flags.install ??
     unwrap(await confirm({ message: 'Install dependencies now?', initialValue: true }));
 
   return {
-    selection: { projectName, db, authProviders },
+    selection: {
+      projectName,
+      db,
+      authProviders,
+      skipAuth,
+      skipEmail,
+      skipUi: flags.skipUi,
+    },
     pm: chosenPm,
     doInstall,
     doGit: flags.git ?? true,

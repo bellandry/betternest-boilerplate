@@ -2,6 +2,7 @@ import {
   boolean,
   mysqlEnum,
   mysqlTable,
+  uniqueIndex,
   text,
   timestamp,
   varchar,
@@ -37,26 +38,31 @@ export const session = mysqlTable('session', {
     .$onUpdate(() => new Date()),
 });
 
-export const account = mysqlTable('account', {
-  id: varchar('id', { length: 36 }).primaryKey(),
-  accountId: varchar('account_id', { length: 255 }).notNull(),
-  providerId: varchar('provider_id', { length: 255 }).notNull(),
-  userId: varchar('user_id', { length: 36 })
-    .notNull()
-    .references(() => user.id, { onDelete: 'cascade' }),
-  accessToken: text('access_token'),
-  refreshToken: text('refresh_token'),
-  idToken: text('id_token'),
-  accessTokenExpiresAt: timestamp('access_token_expires_at'),
-  refreshTokenExpiresAt: timestamp('refresh_token_expires_at'),
-  scope: text('scope'),
-  password: text('password'),
-  createdAt: timestamp('created_at').notNull().defaultNow(),
-  updatedAt: timestamp('updated_at')
-    .notNull()
-    .defaultNow()
-    .$onUpdate(() => new Date()),
-});
+export const account = mysqlTable(
+  'account',
+  {
+    id: varchar('id', { length: 36 }).primaryKey(),
+    accountId: varchar('account_id', { length: 255 }).notNull(),
+    issuer: varchar('issuer', { length: 255 }).notNull(),
+    providerId: varchar('provider_id', { length: 255 }).notNull(),
+    userId: varchar('user_id', { length: 36 })
+      .notNull()
+      .references(() => user.id, { onDelete: 'cascade' }),
+    accessToken: text('access_token'),
+    refreshToken: text('refresh_token'),
+    idToken: text('id_token'),
+    accessTokenExpiresAt: timestamp('access_token_expires_at'),
+    refreshTokenExpiresAt: timestamp('refresh_token_expires_at'),
+    scope: text('scope'),
+    password: text('password'),
+    createdAt: timestamp('created_at').notNull().defaultNow(),
+    updatedAt: timestamp('updated_at')
+      .notNull()
+      .defaultNow()
+      .$onUpdate(() => new Date()),
+  },
+  (table) => [uniqueIndex('account_issuer_accountId_uidx').on(table.issuer, table.accountId)],
+);
 
 export const verification = mysqlTable('verification', {
   id: varchar('id', { length: 36 }).primaryKey(),

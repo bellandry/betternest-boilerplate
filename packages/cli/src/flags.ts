@@ -11,6 +11,9 @@ export interface RawFlags {
   pm?: string;
   install?: boolean; // undefined = ask; false via --no-install
   git?: boolean; // undefined = ask; false via --no-git
+  skipAuth: boolean;
+  skipEmail: boolean;
+  skipUi: boolean;
   yes: boolean;
   dryRun: boolean;
   verbose: boolean;
@@ -21,7 +24,15 @@ const VALUE_FLAGS = new Set(['db', 'auth', 'pm']);
 
 // Supports `--key=value`, `--key value`, `--flag`, `--no-flag`, `-y`, `-v`, `-h`.
 export function parseFlags(argv: string[]): RawFlags {
-  const flags: RawFlags = { yes: false, dryRun: false, verbose: false, help: false };
+  const flags: RawFlags = {
+    yes: false,
+    dryRun: false,
+    verbose: false,
+    help: false,
+    skipAuth: false,
+    skipEmail: false,
+    skipUi: false,
+  };
 
   for (let i = 0; i < argv.length; i++) {
     const arg = argv[i];
@@ -54,6 +65,18 @@ export function parseFlags(argv: string[]): RawFlags {
       flags.install = true;
       continue;
     }
+    if (arg === '--skip-auth') {
+      flags.skipAuth = true;
+      continue;
+    }
+    if (arg === '--skip-email') {
+      flags.skipEmail = true;
+      continue;
+    }
+    if (arg === '--skip-ui') {
+      flags.skipUi = true;
+      continue;
+    }
     if (arg === '--git') {
       flags.git = true;
       continue;
@@ -77,10 +100,7 @@ export function parseFlags(argv: string[]): RawFlags {
       }
 
       if (!VALUE_FLAGS.has(key)) {
-        throw new CliError(
-          `Unknown flag: --${key}`,
-          'Run with --help to see available flags.',
-        );
+        throw new CliError(`Unknown flag: --${key}`, 'Run with --help to see available flags.');
       }
       if (value === undefined || value === '') {
         throw new CliError(`Flag --${key} needs a value, e.g. --${key}=...`);
@@ -124,6 +144,9 @@ Options:
   --pm=<manager>        Package manager: pnpm (the generated workspace uses pnpm)
   --no-install         Skip installing dependencies
   --no-git             Skip git init + first commit
+  --skip-auth          Omit Better Auth, auth pages, and the email package
+  --skip-email         Omit the email package (implies no email/password setup)
+  --skip-ui            Omit the shared @repo/ui package and use plain HTML controls
   -y, --yes            Use defaults / provided flags, skip all prompts
   --dry-run            Print the resolved plan without writing files
   -v, --verbose        Print full stack traces on error

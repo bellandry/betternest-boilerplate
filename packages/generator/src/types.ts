@@ -86,4 +86,7 @@ export interface Selection {
   projectName: string;
   db: string; // db manifest id, e.g. 'prisma'
   authProviders: string[]; // provider manifest ids (folder names under templates/auth-providers)
+  skipAuth?: boolean;
+  skipEmail?: boolean;
+  skipUi?: boolean;
 }

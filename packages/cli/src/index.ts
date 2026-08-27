@@ -8,12 +8,15 @@ import { runGenerator } from './steps/run-generator';
 import { initGit } from './steps/init-git';
 import { installDependencies } from './steps/install-dependencies';
 import { printNextSteps } from './steps/print-next-steps';
+import { runUpdate, UPDATE_HELP_TEXT } from './update';
 
 // Templates are copied next to this bundle at build time (see tsup.config.ts).
 const TEMPLATES_DIR = path.join(__dirname, 'templates');
 
 async function run(flags: RawFlags): Promise<void> {
-  intro('create-betternest-app — Next.js + NestJS + Better Auth, zero CORS/cookie/trustedOrigins pain');
+  intro(
+    'create-betternest-app — Next.js + NestJS + Better Auth, zero CORS/cookie/trustedOrigins pain',
+  );
 
   const plan = await resolvePlan(flags, TEMPLATES_DIR);
   const targetDir = path.resolve(process.cwd(), plan.selection.projectName);
@@ -24,7 +27,9 @@ async function run(flags: RawFlags): Promise<void> {
     [
       `Project    ${plan.selection.projectName}`,
       `Database   ${plan.selection.db}`,
-      `Auth       ${plan.selection.authProviders.join(', ')}`,
+      `Auth       ${plan.selection.skipAuth ? 'disabled' : plan.selection.authProviders.join(', ') || 'none'}`,
+      `Email      ${plan.selection.skipEmail ? 'disabled' : 'enabled when selected'}`,
+      `UI         ${plan.selection.skipUi ? 'minimal local shim' : '@repo/ui'}`,
       `Manager    ${plan.pm}`,
       `Install    ${plan.doInstall ? 'yes' : 'no'}`,
       `Git init   ${plan.doGit ? 'yes' : 'no'}`,
@@ -49,11 +54,27 @@ async function run(flags: RawFlags): Promise<void> {
     db: plan.selection.db,
     installed,
     hasOAuth,
+    authEnabled: !plan.selection.skipAuth,
+    hasEmailPassword: plan.selection.authProviders.includes('email-password'),
   });
 }
 
 async function main(): Promise<void> {
-  const flags = parseFlags(process.argv.slice(2));
+  const argv = process.argv.slice(2);
+  if (argv[0] === 'update') {
+    const flags = parseFlags(argv.slice(1));
+    if (flags.help) {
+      process.stdout.write(`${UPDATE_HELP_TEXT}\n`);
+      return;
+    }
+    const targetDir = flags.projectName
+      ? path.resolve(process.cwd(), flags.projectName)
+      : process.cwd();
+    await runUpdate(flags, targetDir, TEMPLATES_DIR);
+    return;
+  }
+
+  const flags = parseFlags(argv);
   if (flags.help) {
     process.stdout.write(`${HELP_TEXT}\n`);
     return;

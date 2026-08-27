@@ -9,11 +9,16 @@ export const REQUIRED_PROVIDER = 'email-password';
 export async function promptAuthProviders(
   entries: CatalogEntry[],
   initial?: string[],
+  config: { includeRequired?: boolean; allowEmpty?: boolean } = {},
 ): Promise<string[]> {
-  const availableIds = new Set(entries.filter((e) => e.status === 'available').map((e) => e.id));
-  const hasRequired = availableIds.has(REQUIRED_PROVIDER);
+  const includeRequired = config.includeRequired ?? true;
+  const availableEntries = entries.filter((e) => includeRequired || e.id !== REQUIRED_PROVIDER);
+  const availableIds = new Set(
+    availableEntries.filter((e) => e.status === 'available').map((e) => e.id),
+  );
+  const hasRequired = includeRequired && availableIds.has(REQUIRED_PROVIDER);
 
-  const options = entries.map((e) => ({
+  const options = availableEntries.map((e) => ({
     value: e.id,
     label: e.status === 'coming-soon' ? `${e.label} — coming soon` : e.label,
     hint:
@@ -27,9 +32,8 @@ export async function promptAuthProviders(
   const base = (initial && initial.length ? initial : [...availableIds]).filter((id) =>
     availableIds.has(id),
   );
-  const initialValues = hasRequired && !base.includes(REQUIRED_PROVIDER)
-    ? [REQUIRED_PROVIDER, ...base]
-    : base;
+  const initialValues =
+    hasRequired && !base.includes(REQUIRED_PROVIDER) ? [REQUIRED_PROVIDER, ...base] : base;
 
   for (;;) {
     const chosen = unwrap(
@@ -37,7 +41,7 @@ export async function promptAuthProviders(
         message: 'Authentication methods? (space to toggle)',
         options,
         initialValues,
-        required: true,
+        required: !config.allowEmpty,
       }),
     ) as string[];
 

@@ -10,9 +10,25 @@ import { replaceTokens } from './tokens';
 // fragments (they are passed in `skip`, as project-relative POSIX paths).
 
 const TEXT_EXTENSIONS = new Set([
-  '.ts', '.tsx', '.js', '.jsx', '.mjs', '.cjs', '.json', '.md', '.mdx',
-  '.css', '.yaml', '.yml', '.prisma', '.hbs', '.txt', '.example', '.gitignore',
-  '.prettierrc', '.env',
+  '.ts',
+  '.tsx',
+  '.js',
+  '.jsx',
+  '.mjs',
+  '.cjs',
+  '.json',
+  '.md',
+  '.mdx',
+  '.css',
+  '.yaml',
+  '.yml',
+  '.prisma',
+  '.hbs',
+  '.txt',
+  '.example',
+  '.gitignore',
+  '.prettierrc',
+  '.env',
 ]);
 
 // npm strips any file literally named `.gitignore` from a published tarball, so
@@ -50,20 +66,24 @@ export function copyBaseFiles(
   outDir: string,
   tokens: Record<string, string>,
   skip: Set<string>,
+  skipPrefixes: string[] = [],
 ): void {
   for (const abs of walkFiles(baseDir)) {
     const relFromBase = toPosix(path.relative(baseDir, abs));
     // Destination relative path: strip a trailing .hbs suffix, then map any
     // pack-safe filename back to its real (npm-stripped) name.
-    let destRel = relFromBase.endsWith('.hbs')
-      ? relFromBase.slice(0, -'.hbs'.length)
-      : relFromBase;
+    let destRel = relFromBase.endsWith('.hbs') ? relFromBase.slice(0, -'.hbs'.length) : relFromBase;
     const destBase = destRel.slice(destRel.lastIndexOf('/') + 1);
     if (destBase in PACK_SAFE_RENAMES) {
       destRel = destRel.slice(0, destRel.length - destBase.length) + PACK_SAFE_RENAMES[destBase];
     }
 
-    if (skip.has(destRel)) continue;
+    if (
+      skip.has(destRel) ||
+      skipPrefixes.some((prefix) => destRel === prefix || destRel.startsWith(`${prefix}/`))
+    ) {
+      continue;
+    }
 
     const destAbs = path.join(outDir, destRel);
     fs.mkdirSync(path.dirname(destAbs), { recursive: true });

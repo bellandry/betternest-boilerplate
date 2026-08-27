@@ -138,22 +138,36 @@ npm install --global create-betternest-app
 create-betternest-app my-app
 ```
 
+### Updating an existing generated project
+
+Run the update command from the project root, or provide a project path:
+
+```bash
+create-betternest-app update --dry-run
+create-betternest-app update .
+```
+
+The command adds new template files and updates files that still match the last generated snapshot. User-modified files are reported as conflicts and are never overwritten. Use `--dry-run` to preview the result. Projects generated before manifest snapshots were introduced can still receive new files, but existing differences are treated conservatively as conflicts.
+
 ### CLI options
 
-| Option            | Value                                | Description                                      |
-| ----------------- | ------------------------------------ | ------------------------------------------------ |
-| `[project-name]`  | Valid folder name                    | Name of the generated project                    |
-| `--db=<id>`       | See the matrix below                 | Selects the ORM/database combination             |
-| `--auth=<a,b,c>`  | `email-password`, `google`, `github` | Selects comma-separated authentication providers |
-| `--pm=pnpm`       | `pnpm` only                          | Package manager used by the generated workspace  |
-| `--install`       | —                                    | Forces dependency installation                   |
-| `--no-install`    | —                                    | Skips dependency installation                    |
-| `--git`           | —                                    | Forces Git initialization and the first commit   |
-| `--no-git`        | —                                    | Skips Git initialization                         |
-| `--yes`, `-y`     | —                                    | Accepts defaults and disables prompts            |
-| `--dry-run`       | —                                    | Prints the resolved plan without writing files   |
-| `--verbose`, `-v` | —                                    | Prints additional error details                  |
-| `--help`, `-h`    | —                                    | Prints the complete CLI help                     |
+| Option            | Value                                | Description                                                            |
+| ----------------- | ------------------------------------ | ---------------------------------------------------------------------- |
+| `[project-name]`  | Valid folder name                    | Name of the generated project                                          |
+| `--db=<id>`       | See the matrix below                 | Selects the ORM/database combination                                   |
+| `--auth=<a,b,c>`  | `email-password`, `google`, `github` | Selects comma-separated authentication providers                       |
+| `--pm=pnpm`       | `pnpm` only                          | Package manager used by the generated workspace                        |
+| `--install`       | —                                    | Forces dependency installation                                         |
+| `--no-install`    | —                                    | Skips dependency installation                                          |
+| `--git`           | —                                    | Forces Git initialization and the first commit                         |
+| `--no-git`        | —                                    | Skips Git initialization                                               |
+| `--skip-auth`     | —                                    | Omits Better Auth, auth routes, protected pages, and the email package |
+| `--skip-email`    | —                                    | Omits the email package and email-password setup                       |
+| `--skip-ui`       | —                                    | Omits `@repo/ui` and uses a small local HTML shim                      |
+| `--yes`, `-y`     | —                                    | Accepts defaults and disables prompts                                  |
+| `--dry-run`       | —                                    | Prints the resolved plan without writing files                         |
+| `--verbose`, `-v` | —                                    | Prints additional error details                                        |
+| `--help`, `-h`    | —                                    | Prints the complete CLI help                                           |
 
 The CLI rejects unknown database/provider identifiers, entries marked as coming soon, and package managers other than pnpm.
 
@@ -417,6 +431,10 @@ The generated database package delegates to the appropriate tool:
 | Drizzle | `drizzle-kit migrate`   |
 
 The Docker entrypoint runs this contract before starting the API. Do not replace it with `db:push` in production without evaluating the risk of destructive schema changes or data loss.
+
+### Admin bootstrap
+
+Projects with the `email-password` provider expose an idempotent `pnpm db:seed` command. Set `ADMIN_EMAIL`, `ADMIN_PASSWORD`, and optionally `ADMIN_NAME` in the shell or deployment secret manager before running it. The command creates the user if absent, promotes it to `admin`, and marks its email as verified; it never embeds a default password and never changes an existing password. Automatic execution is opt-in through `SEED_ADMIN_ON_STARTUP=true` in a controlled first deployment.
 
 Generate migrations, review them, test them against staging, and commit them with the application code. Maintain backups and a rollback procedure independent from the template generator.
 

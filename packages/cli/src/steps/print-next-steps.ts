@@ -9,10 +9,12 @@ export interface NextStepsInput {
   db: string;
   installed: boolean;
   hasOAuth: boolean;
+  authEnabled: boolean;
+  hasEmailPassword: boolean;
 }
 
 export function printNextSteps(input: NextStepsInput): void {
-  const { relativeDir, pm, db, installed, hasOAuth } = input;
+  const { relativeDir, pm, db, installed, hasOAuth, authEnabled, hasEmailPassword } = input;
   const needsDocker = !db.endsWith('-sqlite');
 
   const lines: string[] = [`cd ${relativeDir}`];
@@ -22,7 +24,7 @@ export function printNextSteps(input: NextStepsInput): void {
   // apps/web/.env because Next resolves env files relative to the app root.
   lines.push('cp .env.example .env');
   lines.push('cp apps/web/.env.example apps/web/.env');
-  lines.push('# set BETTER_AUTH_SECRET in .env (openssl rand -base64 32)');
+  if (authEnabled) lines.push('# set BETTER_AUTH_SECRET in .env (openssl rand -base64 32)');
   if (needsDocker) lines.push('docker compose up -d');
   else lines.push('# SQLite selected: Docker is not required');
   lines.push(runCommand(pm, 'db:push'));
@@ -31,6 +33,13 @@ export function printNextSteps(input: NextStepsInput): void {
   lines.push('# in another terminal, verify the generated project:');
   lines.push('curl -fsS http://localhost:3000/api/health');
   lines.push('curl -fsS http://localhost:3000/api/health/db');
+  if (hasEmailPassword) {
+    lines.push('');
+    lines.push('# optional: bootstrap the first admin user (set secrets first)');
+    lines.push('# export ADMIN_EMAIL=admin@example.com');
+    lines.push('# export ADMIN_PASSWORD=replace-with-a-random-password');
+    lines.push('# pnpm db:seed');
+  }
 
   note(lines.join('\n'), 'Next steps');
 

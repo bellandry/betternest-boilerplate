@@ -6,6 +6,7 @@
     "dev": "nest start --watch",
     "build": "nest build",
     "start": "node dist/main.js",
+    "db:seed": "node dist/scripts/seed.js",
     "lint": "eslint \"src/**/*.ts\""
   },
   "dependencies": {
@@ -15,7 +16,7 @@
     "@nestjs/throttler": "^6.5.0",
     "@repo/auth": "workspace:*",
     "@repo/db": "workspace:*",
-    "better-auth": "^1.6.23",
+    "better-auth": "^1.7.2",
     "dotenv": "^17.4.2",
     "express": "^5.2.1",
     "reflect-metadata": "^0.2.2",

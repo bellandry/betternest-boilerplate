@@ -235,11 +235,39 @@ across instances. Without Redis, counters are in-memory (lost on restart).
 
 ---
 
+## Bootstrap an admin user
+
+The generated project includes an explicit, opt-in admin seed for the email-password provider. It never uses a built-in password and it keeps an existing user’s password unchanged.
+
+Set the values only in your shell or deployment secret manager, then run:
+
+```bash
+export ADMIN_EMAIL=admin@example.com
+export ADMIN_PASSWORD='replace-with-a-random-password'
+export ADMIN_NAME='Administrator'
+pnpm db:seed
+```
+
+The command is idempotent. It creates the user when absent, promotes the matching user to `admin`, and marks that user’s email as verified. It fails if the email-password provider is not enabled. To run it automatically after migrations during a controlled first deployment, set `SEED_ADMIN_ON_STARTUP=true` together with the three `ADMIN_*` variables. Keep `SEED_ADMIN_ON_STARTUP=false` for normal restarts and never commit these values.
+
 ## Data model
 
 <!-- DB_NOTES -->
 
 ---
+
+## Evolving this project
+
+To preview improvements from a newer BetterNest release without overwriting user work, run the update command from this project root:
+
+```bash
+npx create-betternest-app update --dry-run
+npx create-betternest-app update .
+```
+
+New files and files that still match the last generated snapshot can be updated automatically. User-modified files are reported as conflicts and are never overwritten.
+
+When generating a minimal project, the CLI also supports `--skip-auth`, `--skip-email`, and `--skip-ui`. The selected feature contract is recorded in `.betternest.json` so future diagnostics and updates can preserve it.
 
 ## Scripts
 
