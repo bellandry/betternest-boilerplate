@@ -13,7 +13,7 @@
 
 - [Overview](#overview)
 - [Prerequisites](#prerequisites)
-- [Quick start](#quick-start)
+- [First successful project path](#first-successful-project-path)
 - [CLI usage](#cli-usage)
 - [Database matrix](#database-matrix)
 - [Support levels and recommended paths](#support-levels-and-recommended-paths)
@@ -69,7 +69,9 @@ git --version
 docker --version       # optional
 ```
 
-## Quick start
+## First successful project path
+
+This is the canonical local onboarding journey. Follow the steps in order and do not skip the health checks; they are the first success signal for a generated project.
 
 The shortest path uses Prisma with SQLite. It requires neither Docker nor an external database server.
 

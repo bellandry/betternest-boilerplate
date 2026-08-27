@@ -134,7 +134,9 @@ never silently rejected.
 
 ---
 
-## Local setup (step by step)
+## First successful project path
+
+This is the canonical local onboarding journey. Follow the steps in order and do not skip the health checks; they are the first success signal for a generated project.
 
 ### 0. Prerequisites
 

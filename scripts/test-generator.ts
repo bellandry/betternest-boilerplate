@@ -124,6 +124,10 @@ async function main(): Promise<void> {
       ) as { database?: { id?: string }; packageManager?: string };
       assert.equal(projectManifest.database?.id, db.id);
       assert.equal(projectManifest.packageManager, 'pnpm');
+      assert.match(
+        fs.readFileSync(path.join(out, 'README.md'), 'utf8'),
+        /## First successful project path/,
+      );
       const authSource = fs.readFileSync(path.join(out, 'packages/auth/src/index.ts'), 'utf8');
       assert.ok(!authSource.includes('DB_ADAPTER_'));
       assert.match(authSource, /Reset your password/);
