@@ -21,7 +21,7 @@
     ".gitignore": "acf24e2172755eb6050364b5223a8e1701c5611ffc0ae78aaa4a111247ffef1a",
     ".prettierrc": "c043a3fc85f17fe1d1e4198de8387969cb1d2bc6dd921f3c16444579fc797aa4",
     "DEPLOYMENT.md": "1ecb38881d09d2f0aef91b9787183c3ec4d1779a5eba5762572feae94caf4cb4",
-    "README.md": "9448bc7cfcd1407ee0ecde4102ede6499bca9fe4630ccc8d9c166ffd4be68303",
+    "README.md": "04d20bc909cac2fe0ec044be90464de8ca4039ad5bea9bfd6448776f0796493f",
     "apps/api/.env.example": "bea163684df453ae558870ed7c1cf45870539634928ed48f336ed7d538bd22bd",
     "apps/api/Dockerfile": "6e0c7a3bcecaf842271be4e28b6c9b4d102b06263bc4160c1d31ffd6ebfb589c",
     "apps/api/docker-entrypoint.sh": "942b84530b0205be258969b8aa53b38c6f65951e175b6eb7366a073d5d2e4f3c",
