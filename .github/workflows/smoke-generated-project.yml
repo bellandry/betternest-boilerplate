@@ -40,7 +40,7 @@ jobs:
       DATABASE_URL: ${{ matrix.db-url }}
       BETTER_AUTH_SECRET: ci-smoke-not-a-real-secret-0123456789abcdef
       WEB_URL: http://localhost:3000
-      PORT: "4000"
+      PORT: '4000'
     steps:
       - name: Checkout
         uses: actions/checkout@v7
@@ -103,6 +103,16 @@ jobs:
         working-directory: ${{ runner.temp }}/my-app
         run: pnpm build
 
+      - name: Bootstrap the CI admin and verify idempotence
+        working-directory: ${{ runner.temp }}/my-app
+        env:
+          ADMIN_EMAIL: ci-admin@example.com
+          ADMIN_PASSWORD: ci-smoke-admin-password-123
+          ADMIN_NAME: CI Smoke Admin
+        run: |
+          pnpm db:seed
+          pnpm db:seed
+
       - name: Boot the API and probe the session endpoint
         working-directory: ${{ runner.temp }}/my-app
         run: |
@@ -117,9 +127,17 @@ jobs:
             echo "waiting for api ($i)..."; sleep 2
           done
 
+          for endpoint in /api/health /api/health/db; do
+            HEALTH_CODE=$(curl -s -o /dev/null -w "%{http_code}" "http://localhost:${PORT}${endpoint}")
+            echo "GET ${endpoint} -> HTTP ${HEALTH_CODE}"
+            if [ "$HEALTH_CODE" != "200" ]; then
+              echo "Health endpoint failed: ${endpoint}"; exit 1
+            fi
+          done
+
           CODE=$(curl -s -o /dev/null -w "%{http_code}" "http://localhost:${PORT}/api/auth/get-session")
           echo "GET /api/auth/get-session -> HTTP $CODE"
           if [ -z "$CODE" ] || [ "$CODE" -ge 500 ]; then
             echo "API returned a server error (or no response)"; exit 1
           fi
-          echo "API booted and answered without a server error."
+          echo "API booted and answered health and auth probes without a server error."
