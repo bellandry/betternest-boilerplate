@@ -30,7 +30,7 @@ pnpm test:pack
 pnpm smoke-test
 ```
 
-For changes to templates or manifests, regenerate `examples/mvp/` and review the resulting diff. For changes to Docker, deployment configuration, or migration behavior, run the relevant checks in an environment that provides the required infrastructure and record any unavailable validation explicitly.
+For changes to templates or manifests, regenerate `examples/mvp/` and review the resulting diff. The generated-project smoke workflow runs the database matrix on pull requests that affect generated outputs and on pushes to `main`. For changes to Docker, deployment configuration, or migration behavior, run the relevant checks in an environment that provides the required infrastructure and record any unavailable validation explicitly.
 
 ## Support-level rule
 

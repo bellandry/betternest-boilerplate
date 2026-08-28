@@ -3,6 +3,17 @@ name: Smoke (generated project)
 on:
   push:
     branches: [main]
+  pull_request:
+    paths:
+      - '.github/workflows/smoke-generated-project.yml'
+      - 'packages/**'
+      - 'templates/**'
+      - 'scripts/**'
+      - 'examples/**'
+      - 'package.json'
+      - 'pnpm-lock.yaml'
+      - 'pnpm-workspace.yaml'
+      - 'turbo.json'
   workflow_dispatch:
 
 jobs:
