@@ -1,5 +1,16 @@
 # create-betternest-app
 
+## 0.7.0
+
+### Minor Changes
+
+- 2d224a3: Harden generated projects with an ORM-agnostic migration contract, explicit pnpm support, validated runtime configuration, reproducible packaging, and expanded generator coverage.
+- 47594d5: Add an idempotent admin seed, Better Auth 1.7 Account identity schema alignment, a conflict-safe update command, and `--skip-auth`, `--skip-email`, and `--skip-ui` generation options.
+
+### Patch Changes
+
+- d94b48c: Make the generated-project first-run path actionable by publishing support levels, adding health-check verification commands, and documenting the generated-project definition of done.
+
 ## 0.6.6
 
 ### Patch Changes
